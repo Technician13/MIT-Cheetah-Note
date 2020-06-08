@@ -1,0 +1,301 @@
+变量：
+	NUM_CONSTRAINTS_QP：QP问题的约束个数（20）
+	NUM_VARIABLES_QP：QP问题变量个数（12）
+	
+
+函数：
+>>>>>>>	BalanceController::BalanceController() 
+	BalanceController类的构造函数，实例化一个QProblem类的对象QProblemObj_qpOASES以及lcm类的对象lcm。
+	初始化用于QP问题的参数：
+		H_eigen（12×12）
+		A_eigen（20×12）
+		g_eigen（12×1）
+		xOpt_eigen（12×1）
+		yOpt_eigen（12×1）
+	初始化机器人本体和环境参数：
+		mass = 41   质量  
+		inertia = 0.01   惯性  
+		Ig 3×3的单位阵，赋值为 inertia * Ig
+		gravity   重力向量 3×1   
+		direction_normal_flatGround   地面法向向量 3×1   
+		direction_tangential_flatGround   地面切向向量 3×1   
+		contact_state   接触状态向量 4×1 （初始状态四足着地，所以全部元素为1）
+		minNormalForces_feet   GRF最小值向量 4×1  
+		maxNormalForces_feet   GRF最大值向量 4×1  
+	初始化用于实际机器人运动的参数：
+		x_COM_world   CoM在世界坐标系中的位置向量 3×1   
+		xdot_COM_world   CoM在世界坐标系中的速度向量 3×1   
+		omega_b_world   机体在世界坐标系中的角速度向量 3×1   
+		quat_b_world   四元数向量 4×1   	
+		R_b_world   旋转矩阵 3×3   
+		p_feet   足端位置矩阵 3×4   
+		R_yaw_act   偏航角旋转矩阵 3×3 （初始赋值为单位阵）
+	初始化用于机器人期望运动的参数：
+		x_COM_world_desired   CoM在世界坐标系中的期望位置向量 3×1   
+		xdot_COM_world_desired   CoM在世界坐标系中的期望速度向量 3×1   
+		xddot_COM_world_desired   CoM在世界坐标系中的期望加速度向量 3×1   
+		omega_b_world_desired   机体在世界坐标系中的期望角速度向量 3×1   
+		omegadot_b_world_desired   机体在世界坐标系中的期望角加速度向量 3×1   
+		R_b_world_desired   期望旋转矩阵 3×3   
+		orientation_error   旋转偏差向量 3×1   
+
+		
+		error_x_rotated      
+		error_dx_rotated   
+		error_theta_rotated
+		error_dtheta_rotated
+		vbd_command_eigen (3×1)初始化为0 
+	一些中间矩阵：
+		omegaHat
+		tempSkewMatrix3
+		tempVector3
+		A_control   6×(3*4)的矩阵
+		b_control   6×1的向量
+		b_control_Opt   6×1的向量
+		S_control   6×6的矩阵
+		W_control   12×12的矩阵
+		C_control   20×(3*4)的矩阵
+		C_times_f_control   20×1的向量
+		xOptPrev   12×1的向量
+		yOptPrev   (12+20)×1的向量
+		xOpt_qpOASES   12×1的向量，赋值为0
+		xOpt_initialGuess   12×1的向量，赋值为0
+		xOpt_initialGuess   12×1的向量，其中第3、6、9和12个元素初值赋100
+		yOpt_qpOASES  (12+20)×1的向量，元素全部为0
+	调用函数set_QPWeights()
+	调用函数set_RobotLimits()
+	调用函数set_worldData()
+	设置CoM在世界坐标系中的期望位置向量为[ -0.14, 0.0, 0.57]T
+	设置CoM在世界坐标系中的期望速度向量为[0, 0, 0]T
+	设置机体在世界坐标系中的期望角速度向量为[0, 0, 0]T
+	设置期望旋转矩阵为单位阵
+	设置PD控制器的参数：
+		Kp_COMx = 0;
+  		Kp_COMy = 0;
+  		Kp_COMz = 0;
+
+  		Kd_COMx = 0;
+  		Kd_COMy = 0;
+  		Kd_COMz = 0;
+
+  		Kp_Base_roll = 0;
+  		Kp_Base_pitch = 0;
+  		Kp_Base_yaw = 0;
+
+  		Kd_Base_roll = 0;
+  		Kd_Base_pitch = 0;
+  		Kd_Base_yaw = 0;
+	yaw_act   实际的机体偏航角，初始值为0
+	cpu_time = 0.001;
+  	cpu_time_fixed = 0.001;
+  	qp_exit_flag   Qp问题退出标志位，初始值为-1.0;
+  	qp_not_init   QP问题未初始化标志位，初始值为1.0;
+	
+>>>>>>>	BalanceController::set_QPWeights()
+	函数功能：将矩阵S_control、W_control设为单位阵，alpha_control赋值0.1
+
+>>>>>>>	BalanceController::set_RobotLimits()
+	函数功能：将向量minNormalForces_feet的元素全部设置为10,将向量maxNormalForces_feet的元素全部设置为160，即限定GRF范围
+
+>>>>>>>	BalanceController::set_worldData() 
+	函数功能：将向量direction_normal_flatGround设置为[0,0,1]T，即地面法向与z轴正方向重合
+		  将向量gravity设置为[0,0,9.81]T，即重力方向与z轴反方向重合，大小为9.81
+		  将向量direction_tangential_flatGround设置为[0.7071,0.7071,0]T
+		  设置mu_friction为0.05,即设定摩擦系数的值
+
+>>>>>>>	BalanceController::updateProblemData(double* xfb_in, double* p_feet_in,
+                                             double* p_des, double* p_act,
+                                             double* v_des, double* v_act,
+                                             double* O_err, double yaw_act_in)
+	函数功能：调用函数copy_Array_to_Eigen将输入参数xfb_in的第0～3位赋值给向量quat_b_world（4×1）
+		  			    将输入参数xfb_in的第4～6位赋值给向量x_COM_world（3×1）
+					    将输入参数xfb_in的第7～9位赋值给向量omega_b_world（3×1）
+		  			    将输入参数xfb_in的第10～12位赋值给向量xdot_COM_world（3×1）
+		  将输入参数p_feet_in赋值给矩阵p_feet（3×4）
+		  将输入参数yaw_act_in赋值给变量yaw_act
+		  偏航角旋转矩阵R_yaw_act的初始化：
+			 rotZ(yaw)  =   | cos(yaw)   -sin(yaw)   0 |
+                                        | sin(yaw)    cos(yaw)   0 |
+                                        |    0           0       1 |
+		  调用函数quaternion_to_rotationMatrix将四元数向量quat_b_world转换为旋转矩阵R_b_world
+		  调用函数calc_PDcontrol()，得到 b_control (6×1)
+		  调用函数update_A_control()，得到 A_control (6×12)
+		  调用函数calc_H_qpOASES()，得到向量H_qpOASES (1×144)
+		  调用函数calc_A_qpOASES()，得到向量A_qpOASES (1×240)
+		  调用函数calc_g_qpOASES()，得到向量g_qpOASES (1×12)
+		  调用函数update_log_variables
+
+>>>>>>>	BalanceController::copy_Array_to_Eigen(Eigen::VectorXd& target,
+                                               double* source, int len, int startIndex)
+	函数功能：将输入数组source从角标为startIndex起，复制len个元素到向量target
+
+>>>>>>> BalanceController::quaternion_to_rotationMatrix(Eigen::MatrixXd& R, Eigen::VectorXd& quat)
+	函数功能：将输入的四元数向量quat转换为旋转矩阵，应用Rodrigues公式：
+			|  1-2q2^2-2q3^2    2*q1*q2-2q0*q3    2*q1*q3+2q0*q2  |
+			|  2*q1*q2+2*q0*q3  1-2q1^2-2q3^2     2*q2*q3-2*q0*q1 |
+			|  2*q1*q3-2*q0*q2  2*q2*q3+2*q1*q0   1-2*q1^2-2*q2^2 |
+
+>>>>>>> BalanceController::calc_PDcontrol()
+	函数功能：/*************旋转矩阵是正交阵，所以矩阵的转置等于逆矩阵*************/
+		  将CoM的期望位置与实际位置之间的偏差向量转移到机体坐标系中（只考虑偏航角），赋值给error_x_rotated
+		  将CoM的期望速度与实际速度之间的偏差向量转移到机体坐标系中（只考虑偏航角），赋值给error_dx_rotated
+		  调用函数matrixLogRot将旋转矩阵转换为旋转向量orientation_error (3×1)
+			//参考论文High-slope terrain locomotion for torque-controlled quadruped robots
+		  将机体的期望角速度与实际角速度之间的偏差向量转移到机体坐标系中（只考虑偏航角），赋值给error_dtheta_rotated
+		  两组PD控制器：
+			xddot_COM_world_desired =  Kp_COM × error_x_rotated + Kd_COM × error_dx_rotated
+			omegadot_b_world_desired = Kp_Base × orientation_error + Kd_Base × error_dtheta_rotated
+		  将Ig(转动惯量)赋值为：
+			   | 0.35  0   0  |
+			   |   0  2.1  0  |
+  			   |   0   0  2.1 |
+		  将向量b_control (6×1)赋值为期望的力和力矩
+			其中期望的力 = 质量 × （ 期望的加速度 + 重力加速度 ）（3×1）
+			    期望的力矩 = 转动惯量 × 期望的角加速度 （3×1）
+		  
+>>>>>>> BalanceController::matrixLogRot(const Eigen::MatrixXd& R, Eigen::VectorXd& omega)	
+	函数功能：将输入的旋转矩阵R转换为旋转向量omega输出
+
+>>>>>>> BalanceController::update_A_control()
+	函数功能：将矩阵A_control (6×12)赋值
+		  调用函数crossMatrix，将着地腿的位置向量p_feet.col(i)转换为矩阵tempSkewMatrix3
+			| 												    |
+			| R_yaw_act.transpose()    R_yaw_act.transpose()    R_yaw_act.transpose()    R_yaw_act.transpose()  |
+			|	  (3×3)			   (3×3)		  (3×3)			     (3×3)	    |
+			| R_yaw_act.transpose()*   R_yaw_act.transpose()*   R_yaw_act.transpose()*   R_yaw_act.transpose()* |
+			|    tempSkewMatrix3	      tempSkewMatrix3          tempSkewMatrix3          tempSkewMatrix3     |
+			|         (3×3)			   (3×3)   		  (3×3)			     (3×3)          |
+
+>>>>>>> BalanceController::crossMatrix(Eigen::MatrixXd& R, const Eigen::VectorXd& omega)
+	函数功能：将输入向量omega转换为矩阵R输出
+		  	R = |     0      -omega(2)    omega(1) |
+			    |  omega(2)      0       -omega(0) |
+	  		    | -omega(1)   omega(0)       0     |
+
+>>>>>>> BalanceController::calc_H_qpOASES()
+	函数功能：计算H_eigen(12×12)
+		  调用copy_Eigen_to_real_t函数，将矩阵H_eigen转换为向量H_qpOASES
+
+>>>>>>> BalanceController::copy_Eigen_to_real_t(real_t* target, Eigen::MatrixXd& source, int nRows, int nCols)
+	函数功能：将输入矩阵的[0<=i<nRows , 0<=j<nCols]元素赋值给向量target[i+j]输出
+
+>>>>>>> BalanceController::calc_A_qpOASES()
+	函数功能：计算C_control (20×12)
+		  调用copy_Eigen_to_real_t函数，将矩阵C_control转换为向量A_qpOASES
+
+>>>>>>> BalanceController::calc_g_qpOASES() 
+	函数功能：计算g_eigen(12×1)
+		  调用copy_Eigen_to_real_t函数，将向量g_eigen转换为向量g_qpOASES
+
+>>>>>>> BalanceController::update_log_variables(double* p_des, double* p_act, double* v_des, double* v_act, double* O_err)
+	函数功能：调用函数copy_Eigen_to_double将CoM期望位置向量x_COM_world_desired (3×1)赋值给数组p_des (3×1)
+		  			     将CoM实际位置向量x_COM_world (3×1)赋值给数组p_act (3×1)
+					     将CoM期望速度向量xdot_COM_world_desired (3×1)赋值给数组v_des (3×1)
+					     将CoM实际速度向量xdot_COM_world (3×1)赋值给数组v_act (3×1)
+					     将旋转向量orientation_error (3×1)赋值给数组O_err (3×1)
+		  将对应变量赋值给qp_controller_data类中对应的数据成员
+
+>>>>>>> BalanceController::copy_Eigen_to_double(double* target, Eigen::VectorXd& source, int length)
+	函数功能：将输入向量source的前length个元素赋值给数组target
+				
+>>>>>>> BalanceController::SetContactData(double* contact_state_in, double* min_forces_in, double* max_forces_in)
+	函数功能：调用函数copy_Array_to_Eigen将输入数组contact_state_in的前四位赋值给向量contact_state
+					    将输入数组min_forces_in的前四位赋值给向量minNormalForces_feet
+					    将输入数组max_forces_in的前四位赋值给向量maxNormalForces_feet
+		  调用函数calc_lb_ub_qpOASES()，完成对数组lb_qpOASES和数组ub_qpOASES的赋值
+		  调用函数calc_lbA_ubA_qpOASES()，完成对数组lbA_qpOASES和数组ubA_qpOASES的赋值
+
+>>>>>>> BalanceController::calc_lb_ub_qpOASES()
+	函数功能：对着地的每条腿(4)的每个关节(3)进行范围的限定，下限保存在数组lb_qpOASES (1×12)中，上限保存在数组ub_qpOASES (1×12)中
+
+>>>>>>> BalanceController::calc_lbA_ubA_qpOASES()
+	函数功能：对数组lbA_qpOASES (1×20)和数组ubA_qpOASES  (1×20)赋值
+
+>>>>>>> BalanceController::set_desired_swing_pos(double* pFeet_des_in)
+	函数功能：将输入数组pFeet_des_in的前十二个元素赋值给qp_controller_data类中的数据成员数组pfeet_des
+
+>>>>>>> BalanceController::set_actual_swing_pos(double* pFeet_act_in)
+	函数功能：将输入数组pFeet_act_in的前十二个元素赋值给qp_controller_data类中的数据成员数组pfeet_act
+
+>>>>>>> BalanceController::solveQP_nonThreaded(double* xOpt)
+	函数功能：QProblemObj_qpOASES对象的实例化并求解，将初始化的返回值存储到变量qp_exit_flag中
+		  决策变量的结果存储在数组xOpt_qpOASES中 (12)
+		  决策变量和约束的结果存储在数组yOpt_qpOASES中 (12+20)
+		  将边界对象guessedBounds和约束对象guessedConstraints赋值
+		  调用函数copy_real_t_to_Eigen()，将求解得到的数组xOpt_qpOASES赋值给向量xOpt_eigen (12×1)
+		  b_control_Opt   机体坐标系下，通过优化结果反推的合力和合力矩向量 (6×1)
+		  qp_controller_data.b_control_Opt就是b_control_Opt
+		  将向量xOpt_eigen赋值给向量xOptPrev
+		  xOpt为函数输入数组 (12),存储每个足端对地面施加的力 (GRF等大反向)在机体坐标系下的表示
+		  重置QP问题
+		  调用函数calc_constraint_check()，完成对qp_controller_data对象中的成员的赋值
+		  qp_controller_data_publish对象就是qp_controller_data对象
+
+>>>>>>> BalanceController::copy_real_t_to_Eigen(Eigen::VectorXd& target, real_t* source, int len) 
+	函数功能：将输入数组source的前len个元素赋值给向量target输出
+
+>>>>>>> BalanceController::calc_constraint_check()
+	函数功能：C_times_f_control   为约束矩阵C_control与优化后的结果向量xOpt_eigen的乘积
+		  将qp_controller_data对象中的成员进行赋值：
+			qp_controller_data.xOpt = xOpt_eigen
+			qp_controller_data.lbA = lbA_qpOASES
+			qp_controller_data.ubA = ubA_qpOASES
+			qp_controller_data.C_times_f = C_times_f_control
+			qp_controller_data.b_control = b_control
+
+>>>>>>> BalanceController::verifyModel(double* vbd_command)
+	函数功能：计算根据优化结果反推的在机体坐标系下的加速度 (合加速度减去重力加速度)
+
+>>>>>>> BalanceController::publish_data_lcm()
+	函数功能使用lcm对象发布结果 (qp_controller_data_publish对象)
+
+>>>>>>> BalanceController::set_PDgains(double* Kp_COM_in, double* Kd_COM_in,
+                                       double* Kp_Base_in, double* Kd_Base_in)
+	函数功能：设定PD控制器的参数
+
+>>>>>>> BalanceController::set_desiredTrajectoryData(double* rpy_des_in, double* p_des_in, double* omegab_des_in,
+    						     double* v_des_in)
+	函数功能：将输入数组p_des_in赋值给CoM期望位置向量x_COM_world_desired (3×1)
+		  调用函数rpyToR()，根据输入数组rpy_des_in计算旋转向量R_b_world_desired
+		  根据输入数组omegab_des_in，给机体在世界坐标系中的期望角速度向量omega_b_world_desired (3×1)赋值
+		  根据输入数组v_des_in，给CoM在世界坐标系中的期望速度向量xdot_COM_world_desired (3×1)赋值
+
+>>>>>>> BalanceController::rpyToR(Eigen::MatrixXd& R, double* rpy_in)
+	函数功能：根据输入数组rpy_in (横滚角、俯仰角、偏航角)计算旋转矩阵R输出
+
+>>>>>>> BalanceController::set_wrench_weights(double* COM_weights_in, double* Base_weights_in)
+	函数功能：给S_control矩阵对角线元素赋值
+
+>>>>>>> BalanceController::set_QP_options(double use_hard_constraint_pitch_in) 
+	函数功能：设定QP问题求解方式
+
+>>>>>>> BalanceController::set_QPWeights()
+	函数功能：将矩阵S_control和W_control设定为单位阵， alpha_control设定为0.1
+
+>>>>>>> BalanceController::set_alpha_control(double alpha_control_in)
+	函数功能：根据输入变量alpha_control_in给变量alpha_control赋值
+
+>>>>>>> BalanceController::set_mass(double mass_in)
+	函数功能：根据输入变量mass_in给变量mass赋值
+
+>>>>>>> BalanceController::getQPFinished()
+	函数功能：QP问题是否求解完毕，返回标志位、
+
+>>>>>>> BalanceController::print_QPData() 
+	函数功能：调用print_real_t()函数打印QP问题参数：
+			H_qpOASES、A_qpOASES、g_qpOASES、lb_qpOASES、ub_qpOASES、lbA_qpOASES、ubA_qpOASES
+
+>>>>>>> BalanceController::print_real_t(real_t* matrix, int nRows, int nCols)
+	函数功能：将输入数组matrix打印成矩阵形式 (nRows×nCols)
+
+>>>>>>> BalanceController::matrixExpOmegaCross(const Eigen::VectorXd& omega, Eigen::MatrixXd& R)
+	函数功能：目前我还不知道这是要干嘛。。。
+
+
+
+
+
+
+
+
+
