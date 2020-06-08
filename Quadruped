@@ -17,4 +17,3 @@
 	Mat3<T> coordinateRotation(CoordinateAxis axis, T theta)
 	函数功能：根据枚举类型的输入参数axis(X/Y/Z)以及旋转角theta，输出旋转矩阵R(3×3)
 
-
