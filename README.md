@@ -9,6 +9,7 @@
 `Quadruped` 对应源码中Quadruped相关文件的剖析，主要是构建四足机器人的动力学和运动学模型。     
        
 ### 其他
-原始项目地址：[https://github.com/mit-biomimetics/Cheetah-Software](https://github.com/mit-biomimetics/Cheetah-Software)
+原始项目地址：[https://github.com/mit-biomimetics/Cheetah-Software](https://github.com/mit-biomimetics/Cheetah-Software)       
+qpOASES求解器地址：[https://github.com/coin-or/qpOASES](https://github.com/coin-or/qpOASES)
        
 ## Loading......
