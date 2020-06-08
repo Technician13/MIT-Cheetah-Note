@@ -3,12 +3,12 @@
 ### 仓库说明
 >在看MIT Cheetah仿真平台的源码的过程中所做的笔记的整理，由于我所拿到的源码的注释不完善，也没找到配套的说明文档，同时为了更好地理解源码，因此对应代码中
 提到的部分参考论文，手动整理了这份笔记，希望与同好交流，笔记中的错误之处欢迎指正。
-
+       
 ### 文件结构
-`BalanceController` 对应源码中BalanceController相关文件（*.cpp/*.h/*.hpp）的剖析,主要是调用qpOASES求解器完成对四足机器人GRF的优化求解过程。
-`Quadruped` 对应源码中Quadruped相关文件（*.cpp/*.h/*.hpp）的剖析，主要是构建四足机器人的动力学和运动学模型。
-
+`BalanceController` 对应源码中BalanceController相关文件（*.cpp/*.h/*.hpp）的剖析,主要是调用qpOASES求解器完成对四足机器人GRF的优化求解过程。     
+`Quadruped` 对应源码中Quadruped相关文件（*.cpp/*.h/*.hpp）的剖析，主要是构建四足机器人的动力学和运动学模型。     
+       
 ### 其他
 原始项目地址：[https://github.com/mit-biomimetics/Cheetah-Software](https://github.com/mit-biomimetics/Cheetah-Software)
-
+       
 ## Loading......
