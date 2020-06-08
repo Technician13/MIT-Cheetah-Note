@@ -2,7 +2,6 @@
 	NUM_CONSTRAINTS_QP：QP问题的约束个数（20）
 	NUM_VARIABLES_QP：QP问题变量个数（12）
 	
-
 函数：
 >>>>>>>	BalanceController::BalanceController() 
 	BalanceController类的构造函数，实例化一个QProblem类的对象QProblemObj_qpOASES以及lcm类的对象lcm。
