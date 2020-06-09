@@ -1,0 +1,65 @@
+参数：bodyId：机体-----5
+
+
+
+
+>>>>>>> template <typename T>
+	bool Quadruped<T>::buildModel(FloatingBaseModel<T>& model)
+	函数功能：输入参数model为一个FloatingBaseModel类的对象
+		  创建向量bodyDims (3×1)，存储机体的长_bodyLength、宽_bodyWidth和高_bodyHeight
+		  调用函数addBase(_bodyInertia)，添加机体相关属性
+		  调用函数addGroundContactBoxPoints(5, bodyDims)
+
+>>>>>>> template <typename T>
+	void FloatingBaseModel<T>::addBase(const SpatialInertia<T> &inertia) 
+	函数功能：eye6 单位阵 (6×6)
+		  zero6 零矩阵 (6×6)
+		  SpatialInertia<T>类的对象zeroInertia实例化，zeroInertia->_inertia = zero6
+		  _nDof 赋值为6,表示机体有六个空间自由度
+		  使用push_back()函数，循环六次 (六个自由度？？？)向定义的九个向量中压入值：
+			_parents向量：存储父元件，六个元素均为0
+			_gearRatios向量：存储传动比，前五个元素均为0，最后一个元素为1
+			_jointTypes向量：存储关节类型，前五个元素均为Nothing，最后一个元素为FloatingBase。
+					 枚举类型JointType：Prismatic滑动副，Revolute转动副，FloatingBase机体，Nothing不是运动副
+			_jointAxes向量：存储关节轴线，六个元素均为X。
+					 枚举类型CoordinateAxis：X，Y，Z
+			_Xtree向量：
+			_Ibody向量：前五个元素均为zeroInertia，最后一个元素为inertia (addBase函数输入参数)
+			_Xrot向量：
+			_Irot向量：
+			_bodyNames向量：向量中的前五个元素均为N/A，最后一个元素为FloatingBase
+		  调用addDynamicsVars(6)函数，完成动力学变量的配置
+
+>>>>>>> template <typename T>
+	void FloatingBaseModel<T>::addDynamicsVars(int count)	
+	函数功能：配置动力学变量	
+
+>>>>>>> template <typename T>
+	void FloatingBaseModel<T>::addGroundContactBoxPoints(int bodyId, const Vec3<T> &dims)
+	函数功能：将机体视作长方体的盒子(box)，此函数完成box八个角点在以机体中心点为原点的坐标系框架内的坐标的计算
+		  调用addGroundContactPoint()函数
+
+>>>>>>> template <typename T>
+	int FloatingBaseModel<T>::addGroundContactPoint(int bodyID, const Vec3<T> &location, bool isFoot)
+	函数功能：
+
+>>>>>>> template <typename T, typename T2>
+	Vec3<T> withLegSigns(const Eigen::MatrixBase<T2>& v, int legID) 
+	函数功能：输入参数v是机械结构相对于机器人机体中心点在x、y和z三个方向上的距离，根据此机械结构所属的腿不同，将其转换为相对于机体中心点为原点的位置坐标输出。
+
+>>>>>>> template <typename T>
+	Mat3<typename T::Scalar> vectorToSkewMat(const Eigen::MatrixBase<T>& v)
+	函数功能：输入三维向量v，输出v所对应的反对称矩阵
+	参考：https://blog.csdn.net/u012200261/article/details/56494754/
+
+>>>>>>> template <typename T, typename T2>
+	auto createSXform(const Eigen::MatrixBase<T>& R,const Eigen::MatrixBase<T2>& r)
+	函数功能：输出矩阵X (6×6)
+			X = |          R                         0   |
+			    | -R*vectorToSkewMat(r)              R   |
+                            
+>>>>>>> template <typename T>
+	Mat3<T> coordinateRotation(CoordinateAxis axis, T theta)
+	函数功能：根据枚举类型的输入参数axis(X/Y/Z)以及旋转角theta，输出旋转矩阵R(3×3)
+
+
