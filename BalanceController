@@ -10,7 +10,7 @@
 		A_eigen（20×12）
 		g_eigen（12×1）
 		xOpt_eigen（12×1）
-		yOpt_eigen（12×1）
+		yOpt_eigen（32×1）
 	初始化机器人本体和环境参数：
 		mass = 41   质量  
 		inertia = 0.01   惯性  
@@ -67,7 +67,7 @@
 	设置CoM在世界坐标系中的期望位置向量为[ -0.14, 0.0, 0.57]T
 	设置CoM在世界坐标系中的期望速度向量为[0, 0, 0]T
 	设置机体在世界坐标系中的期望角速度向量为[0, 0, 0]T
-	设置期望旋转矩阵为单位阵
+	设置期望旋转矩阵为单位阵，即横滚角、俯仰角和偏航角的期望值均为0，机体不发生任何旋转行为
 	设置PD控制器的参数：
 		Kp_COMx = 0;
   		Kp_COMy = 0;
@@ -99,7 +99,7 @@
 >>>>>>>	BalanceController::set_worldData() 
 	函数功能：将向量direction_normal_flatGround设置为[0,0,1]T，即地面法向与z轴正方向重合
 		  将向量gravity设置为[0,0,9.81]T，即重力方向与z轴反方向重合，大小为9.81
-		  将向量direction_tangential_flatGround设置为[0.7071,0.7071,0]T
+		  将向量direction_tangential_flatGround设置为[0.7071,0.7071,0]T，即地面切向
 		  设置mu_friction为0.05,即设定摩擦系数的值
 
 >>>>>>>	BalanceController::updateProblemData(double* xfb_in, double* p_feet_in,
@@ -113,9 +113,9 @@
 		  将输入参数p_feet_in赋值给矩阵p_feet（3×4）
 		  将输入参数yaw_act_in赋值给变量yaw_act
 		  偏航角旋转矩阵R_yaw_act的初始化：
-			 rotZ(yaw)  =   | cos(yaw)   -sin(yaw)   0 |
-                                        | sin(yaw)    cos(yaw)   0 |
-                                        |    0           0       1 |
+			 rotZ(yaw)  =   | cos(yaw_act)   -sin(yaw_act)   0 |
+                                                     | sin(yaw_act)    cos(yaw_act)   0 |
+                                                     |             0                            0                1 |
 		  调用函数quaternion_to_rotationMatrix将四元数向量quat_b_world转换为旋转矩阵R_b_world
 		  调用函数calc_PDcontrol()，得到 b_control (6×1)
 		  调用函数update_A_control()，得到 A_control (6×12)
@@ -130,8 +130,8 @@
 
 >>>>>>> BalanceController::quaternion_to_rotationMatrix(Eigen::MatrixXd& R, Eigen::VectorXd& quat)
 	函数功能：将输入的四元数向量quat转换为旋转矩阵，应用Rodrigues公式：
-			|  1-2q2^2-2q3^2    2*q1*q2-2q0*q3    2*q1*q3+2q0*q2  |
-			|  2*q1*q2+2*q0*q3  1-2q1^2-2q3^2     2*q2*q3-2*q0*q1 |
+			|  1-2q2^2-2q3^2    2*q1*q2-2q0*q3        2*q1*q3+2q0*q2  |
+			|  2*q1*q2+2*q0*q3  1-2q1^2-2q3^2       2*q2*q3-2*q0*q1 |
 			|  2*q1*q3-2*q0*q2  2*q2*q3+2*q1*q0   1-2*q1^2-2*q2^2 |
 
 >>>>>>> BalanceController::calc_PDcontrol()
@@ -145,9 +145,9 @@
 			xddot_COM_world_desired =  Kp_COM × error_x_rotated + Kd_COM × error_dx_rotated
 			omegadot_b_world_desired = Kp_Base × orientation_error + Kd_Base × error_dtheta_rotated
 		  将Ig(转动惯量)赋值为：
-			   | 0.35  0   0  |
-			   |   0  2.1  0  |
-  			   |   0   0  2.1 |
+			   | 0.35  0    0   |
+			   |   0    2.1   0   |
+  			   |   0      0   2.1 |
 		  将向量b_control (6×1)赋值为期望的力和力矩
 			其中期望的力 = 质量 × （ 期望的加速度 + 重力加速度 ）（3×1）
 			    期望的力矩 = 转动惯量 × 期望的角加速度 （3×1）
