@@ -148,6 +148,7 @@
 			   | 0.35  0    0   |
 			   |   0    2.1   0   |
   			   |   0      0   2.1 |
+		  矩阵II是将惯量矩阵Ig转换到世界坐标系下的表示，接下来b_control的计算均是在世界坐标系下完成
 		  将向量b_control (6×1)赋值为期望的力和力矩
 			其中期望的力 = 质量 × （ 期望的加速度 + 重力加速度 ）（3×1）
 			    期望的力矩 = 转动惯量 × 期望的角加速度 （3×1）
@@ -155,25 +156,29 @@
 >>>>>>> BalanceController::matrixLogRot(const Eigen::MatrixXd& R, Eigen::VectorXd& omega)	
 	函数功能：将输入的旋转矩阵R转换为旋转向量omega输出
 
+>>>>>>> BalanceController::calc_constraint_check() 
+	函数功能：对qp_controller_data对象中的成员赋值
+
 >>>>>>> BalanceController::update_A_control()
 	函数功能：将矩阵A_control (6×12)赋值
 		  调用函数crossMatrix，将着地腿的位置向量p_feet.col(i)转换为矩阵tempSkewMatrix3
-			| 												    |
-			| R_yaw_act.transpose()    R_yaw_act.transpose()    R_yaw_act.transpose()    R_yaw_act.transpose()  |
-			|	  (3×3)			   (3×3)		  (3×3)			     (3×3)	    |
+			| 												                                                                                                                 |
+			| R_yaw_act.transpose()    R_yaw_act.transpose()    R_yaw_act.transpose()    R_yaw_act.transpose()      |
+			|	          (3×3)			                      (3×3)		                          (3×3)			                       (3×3)	                    |
 			| R_yaw_act.transpose()*   R_yaw_act.transpose()*   R_yaw_act.transpose()*   R_yaw_act.transpose()* |
-			|    tempSkewMatrix3	      tempSkewMatrix3          tempSkewMatrix3          tempSkewMatrix3     |
-			|         (3×3)			   (3×3)   		  (3×3)			     (3×3)          |
+			|    tempSkewMatrix3	      tempSkewMatrix3          tempSkewMatrix3          tempSkewMatrix3                         |
+			|                 (3×3)			                      (3×3)   		                          (3×3)			                       (3×3)                        |
 
 >>>>>>> BalanceController::crossMatrix(Eigen::MatrixXd& R, const Eigen::VectorXd& omega)
 	函数功能：将输入向量omega转换为矩阵R输出
 		  	R = |     0      -omega(2)    omega(1) |
-			    |  omega(2)      0       -omega(0) |
-	  		    | -omega(1)   omega(0)       0     |
+			       |  omega(2)      0       -omega(0) |
+	  		       | -omega(1)   omega(0)       0     |
 
 >>>>>>> BalanceController::calc_H_qpOASES()
 	函数功能：计算H_eigen(12×12)
-		  调用copy_Eigen_to_real_t函数，将矩阵H_eigen转换为向量H_qpOASES
+				H_eigen = 2 * [ A.transpose * S * A + (alpha=0.001) * W ]
+		             调用copy_Eigen_to_real_t函数，将矩阵H_eigen转换为向量H_qpOASES
 
 >>>>>>> BalanceController::copy_Eigen_to_real_t(real_t* target, Eigen::MatrixXd& source, int nRows, int nCols)
 	函数功能：将输入矩阵的[0<=i<nRows , 0<=j<nCols]元素赋值给向量target[i+j]输出
