@@ -177,7 +177,7 @@
 
 >>>>>>> BalanceController::calc_H_qpOASES()
 	函数功能：计算H_eigen(12×12)
-				H_eigen = 2 * [ A.transpose * S * A + (alpha=0.001) * W ]
+				H_eigen = 2 * [ A.transpose * S * A + (alpha+0.001) * W ]
 		             调用copy_Eigen_to_real_t函数，将矩阵H_eigen转换为向量H_qpOASES
 
 >>>>>>> BalanceController::copy_Eigen_to_real_t(real_t* target, Eigen::MatrixXd& source, int nRows, int nCols)
@@ -190,6 +190,13 @@
 >>>>>>> BalanceController::calc_g_qpOASES() 
 	函数功能：计算g_eigen(12×1)
 		  调用copy_Eigen_to_real_t函数，将向量g_eigen转换为向量g_qpOASES
+		  
+>>>>>>> BalanceController::calc_lb_ub_qpOASES()
+	函数功能：计算 lb_qpOASES和ub_qpOASES，二者均为向量，作用是限定限定每条腿的三个关节力矩的范围
+	
+>>>>>>> BalanceController::calc_lbA_ubA_qpOASES()
+	函数功能：计算 lbA_qpOASES和ubA_qpOASES，二者分别对应论文
+				High-slope terrain locomotion for torque-controlled quadruped robots中公式(8)的d_和d-
 
 >>>>>>> BalanceController::update_log_variables(double* p_des, double* p_act, double* v_des, double* v_act, double* O_err)
 	函数功能：调用函数copy_Eigen_to_double将CoM期望位置向量x_COM_world_desired (3×1)赋值给数组p_des (3×1)
