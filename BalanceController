@@ -236,6 +236,7 @@
 	函数功能：设置与触地相关的参数
 			        调用copy_Array_to_Eigen函数,分别将：
 					
+					
 
 >>>>>>> BalanceController::set_desired_swing_pos(double* pFeet_des_in)
 	函数功能：将输入数组pFeet_des_in的前十二个元素赋值给qp_controller_data类中的数据成员数组pfeet_des
