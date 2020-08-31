@@ -122,7 +122,7 @@
 		  调用函数calc_H_qpOASES()，得到向量H_qpOASES (1×144)
 		  调用函数calc_A_qpOASES()，得到向量A_qpOASES (1×240)
 		  调用函数calc_g_qpOASES()，得到向量g_qpOASES (1×12)
-		  调用函数update_log_variables
+		  调用函数update_log_variables，初始化优化问题的参数
 
 >>>>>>>	BalanceController::copy_Array_to_Eigen(Eigen::VectorXd& target,
                                                double* source, int len, int startIndex)
@@ -221,6 +221,21 @@
 
 >>>>>>> BalanceController::calc_lbA_ubA_qpOASES()
 	函数功能：对数组lbA_qpOASES (1×20)和数组ubA_qpOASES  (1×20)赋值
+	
+>>>>>>> BalanceController::update_log_variables(double* p_des, double* p_act, double* v_des, double* v_act, double* O_err)
+	函数功能：对优化问题的参数进行赋值
+				qp_controller_data.p_des = x_COM_world_desired （p_des）
+                                qp_controller_data.p_act = x_COM_world（p_act）
+				qp_controller_data.v_des = xdot_COM_world_desired（v_des）
+				qp_controller_data.v_act = xdot_COM_world（v_act）
+				qp_controller_data.O_err = orientation_error（O_err）
+				qp_controller_data.omegab_des = omega_b_world_desired
+				qp_controller_data.omegab_act = omega_b_world
+				
+>>>>>>> BalanceController::SetContactData(double* contact_state_in, double* min_forces_in, double* max_forces_in) 
+	函数功能：设置与触地相关的参数
+			        调用copy_Array_to_Eigen函数,分别将：
+					
 
 >>>>>>> BalanceController::set_desired_swing_pos(double* pFeet_des_in)
 	函数功能：将输入数组pFeet_des_in的前十二个元素赋值给qp_controller_data类中的数据成员数组pfeet_des
