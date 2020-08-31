@@ -170,7 +170,7 @@
 			|                 (3×3)			                      (3×3)   		                          (3×3)			                       (3×3)                        |
 
 >>>>>>> BalanceController::crossMatrix(Eigen::MatrixXd& R, const Eigen::VectorXd& omega)
-	函数功能：将输入向量omega转换为矩阵R输出
+	函数功能：将输入向量omega转换为叉乘矩阵R输出
 		  	R = |     0      -omega(2)    omega(1) |
 			       |  omega(2)      0       -omega(0) |
 	  		       | -omega(1)   omega(0)       0     |
@@ -317,8 +317,8 @@
 	函数功能：将输入数组matrix打印成矩阵形式 (nRows×nCols)
 
 >>>>>>> BalanceController::matrixExpOmegaCross(const Eigen::VectorXd& omega, Eigen::MatrixXd& R)
-	函数功能：目前我还不知道这是要干嘛。。。
-
+	函数功能：罗徳里格斯公式的代码实现
+				
 
 
 
