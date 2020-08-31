@@ -191,13 +191,6 @@
 	函数功能：计算g_eigen(12×1)
 		  调用copy_Eigen_to_real_t函数，将向量g_eigen转换为向量g_qpOASES
 		  
->>>>>>> BalanceController::calc_lb_ub_qpOASES()
-	函数功能：计算 lb_qpOASES和ub_qpOASES，二者均为向量，作用是限定限定每条腿的三个关节力矩的范围
-	
->>>>>>> BalanceController::calc_lbA_ubA_qpOASES()
-	函数功能：计算 lbA_qpOASES和ubA_qpOASES，二者分别对应论文
-				High-slope terrain locomotion for torque-controlled quadruped robots中公式(8)的d_和d-
-
 >>>>>>> BalanceController::update_log_variables(double* p_des, double* p_act, double* v_des, double* v_act, double* O_err)
 	函数功能：调用函数copy_Eigen_to_double将CoM期望位置向量x_COM_world_desired (3×1)赋值给数组p_des (3×1)
 		  			     将CoM实际位置向量x_COM_world (3×1)赋值给数组p_act (3×1)
@@ -208,20 +201,7 @@
 
 >>>>>>> BalanceController::copy_Eigen_to_double(double* target, Eigen::VectorXd& source, int length)
 	函数功能：将输入向量source的前length个元素赋值给数组target
-				
->>>>>>> BalanceController::SetContactData(double* contact_state_in, double* min_forces_in, double* max_forces_in)
-	函数功能：调用函数copy_Array_to_Eigen将输入数组contact_state_in的前四位赋值给向量contact_state
-					    将输入数组min_forces_in的前四位赋值给向量minNormalForces_feet
-					    将输入数组max_forces_in的前四位赋值给向量maxNormalForces_feet
-		  调用函数calc_lb_ub_qpOASES()，完成对数组lb_qpOASES和数组ub_qpOASES的赋值
-		  调用函数calc_lbA_ubA_qpOASES()，完成对数组lbA_qpOASES和数组ubA_qpOASES的赋值
-
->>>>>>> BalanceController::calc_lb_ub_qpOASES()
-	函数功能：对着地的每条腿(4)的每个关节(3)进行范围的限定，下限保存在数组lb_qpOASES (1×12)中，上限保存在数组ub_qpOASES (1×12)中
-
->>>>>>> BalanceController::calc_lbA_ubA_qpOASES()
-	函数功能：对数组lbA_qpOASES (1×20)和数组ubA_qpOASES  (1×20)赋值
-	
+					
 >>>>>>> BalanceController::update_log_variables(double* p_des, double* p_act, double* v_des, double* v_act, double* O_err)
 	函数功能：对优化问题的参数进行赋值
 				qp_controller_data.p_des = x_COM_world_desired （p_des）
@@ -235,14 +215,23 @@
 >>>>>>> BalanceController::SetContactData(double* contact_state_in, double* min_forces_in, double* max_forces_in) 
 	函数功能：设置与触地相关的参数
 			        调用copy_Array_to_Eigen函数,分别将：
-					
-					
-
+					数组contact_state_in赋值给向量contact_state
+					数组min_forces_in赋值给向量minNormalForces_feet
+					数组max_forces_in赋值给向量maxNormalForces_feet
+				调用函数calc_lb_ub_qpOASES()以及calc_lbA_ubA_qpOASES()完成力上下界的配置
+				
+>>>>>>> BalanceController::calc_lb_ub_qpOASES()
+	函数功能：计算 lb_qpOASES和ub_qpOASES，二者均为向量，作用是限定限定每条腿足端三个方向分力的范围
+	
+>>>>>>> BalanceController::calc_lbA_ubA_qpOASES()
+	函数功能：计算 lbA_qpOASES和ubA_qpOASES，二者分别对应论文
+				High-slope terrain locomotion for torque-controlled quadruped robots中公式(8)的d_和d-
+				
 >>>>>>> BalanceController::set_desired_swing_pos(double* pFeet_des_in)
-	函数功能：将输入数组pFeet_des_in的前十二个元素赋值给qp_controller_data类中的数据成员数组pfeet_des
+	函数功能：将输入数组pFeet_des_in的十二个元素赋值给数组qp_controller_data.pfeet_des
 
 >>>>>>> BalanceController::set_actual_swing_pos(double* pFeet_act_in)
-	函数功能：将输入数组pFeet_act_in的前十二个元素赋值给qp_controller_data类中的数据成员数组pfeet_act
+	函数功能：将输入数组pFeet_act_in的十二个元素赋值给qp_controller_data.pfeet_act
 
 >>>>>>> BalanceController::solveQP_nonThreaded(double* xOpt)
 	函数功能：QProblemObj_qpOASES对象的实例化并求解，将初始化的返回值存储到变量qp_exit_flag中
@@ -280,8 +269,7 @@
                                        double* Kp_Base_in, double* Kd_Base_in)
 	函数功能：设定PD控制器的参数
 
->>>>>>> BalanceController::set_desiredTrajectoryData(double* rpy_des_in, double* p_des_in, double* omegab_des_in,
-    						     double* v_des_in)
+>>>>>>> BalanceController::set_desiredTrajectoryData(double* rpy_des_in, double* p_des_in, double* omegab_des_in,  double* v_des_in)
 	函数功能：将输入数组p_des_in赋值给CoM期望位置向量x_COM_world_desired (3×1)
 		  调用函数rpyToR()，根据输入数组rpy_des_in计算旋转向量R_b_world_desired
 		  根据输入数组omegab_des_in，给机体在世界坐标系中的期望角速度向量omega_b_world_desired (3×1)赋值
@@ -291,13 +279,23 @@
 	函数功能：根据输入数组rpy_in (横滚角、俯仰角、偏航角)计算旋转矩阵R输出
 
 >>>>>>> BalanceController::set_wrench_weights(double* COM_weights_in, double* Base_weights_in)
-	函数功能：给S_control矩阵对角线元素赋值
+	函数功能：给S_control矩阵对角线元素赋值，表示权重的矩阵
 
 >>>>>>> BalanceController::set_QP_options(double use_hard_constraint_pitch_in) 
 	函数功能：设定QP问题求解方式
 
 >>>>>>> BalanceController::set_QPWeights()
-	函数功能：将矩阵S_control和W_control设定为单位阵， alpha_control设定为0.1
+	函数功能：将矩阵S_control和W_control设定为单位阵， alpha_control设定为0.1，权重矩阵和权重系数的初始化
+	
+>>>>>>> BalanceController::set_worldData()
+	函数功能：设定环境相关的参数：
+				地面的法向方向  direction_normal_flatGround << 0, 0, 1
+				重力大小及方向  gravity << 0, 0, 9.81
+				地面的切向方向  direction_tangential_flatGround << 0.7071, 0.7071, 0
+				摩擦系数  mu_friction = 0.05
+
+>>>>>>> BalanceController::set_friction(double mu_in) 
+	函数功能：根据输入变量mu_in给变量mu_friction赋值
 
 >>>>>>> BalanceController::set_alpha_control(double alpha_control_in)
 	函数功能：根据输入变量alpha_control_in给变量alpha_control赋值
@@ -305,8 +303,11 @@
 >>>>>>> BalanceController::set_mass(double mass_in)
 	函数功能：根据输入变量mass_in给变量mass赋值
 
+>>>>>>> BalanceController::set_RobotLimits()
+	函数功能：设定足端法向分力的最小值10和最大值160
+
 >>>>>>> BalanceController::getQPFinished()
-	函数功能：QP问题是否求解完毕，返回标志位、
+	函数功能：QP问题是否求解完毕，返回标志位
 
 >>>>>>> BalanceController::print_QPData() 
 	函数功能：调用print_real_t()函数打印QP问题参数：
