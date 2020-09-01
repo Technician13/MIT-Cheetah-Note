@@ -1,1 +1,43 @@
-。
+>>>>>>>	template <typename T>
+                  void LegControllerCommand<T>::zero()
+	函数功能：将结构体LegControllerCommand中所有的参数置零
+                          向量类型参数：tauFeedForward：输出的力矩（3*1）
+                                                         forceFeedForward：输出的力（3*1）
+                                                         qDes：期望的关节位置（3*1）
+                                                         qdDes：期望的关节速度（3*1）
+                                                         pDes：期望的足端位置（3*1）
+                                                         vDes：期望的足端速度（3*1）
+                          矩阵类型参数：kpCartesian：笛卡尔空间比例系数，用来对足端行为进行控制（3*3）
+                                                         kdCartesian：笛卡尔空间微分系数，用来对足端行为进行控制（3*3）
+                                                         kpJoint：关节空间比例系数，用来对关节行为进行控制（3*3）
+                                                         kdJoint：关节空间微分系数，用来对关节行为进行控制（3*3）
+
+>>>>>>>	template <typename T>
+                  void LegControllerData<T>::zero() 
+	函数功能：将结构体LegControllerData中所有的参数置零
+                          向量类型参数：q
+                                                         qd
+                                                         p
+                                                         v
+                                                         tauEstimate
+                          矩阵类型参数：J
+                         
+>>>>>>>	template <typename T>
+                  void LegController<T>::zeroCommand()
+	函数功能：commands为定义的4个元素的LegControllerCommand结构体数组
+                        for循环遍历调用4个元素中的zero()函数
+                        将_legsEnabled变量置为false
+                        
+>>>>>>>	template <typename T>
+                  void LegController<T>::edampCommand(RobotType robot, T gain) 
+	函数功能：根据输入参数robot是Cheetah 3还是mini-cheetah，对微分系数矩阵kdCartesian或kdJoint使用输入参数gain进行对角赋值
+  
+>>>>>>>	template <typename T>
+                  void LegController<T>::updateData(const SpiData* spiData) 
+	函数功能：datas为定义的4个元素的LegControllerData结构体数组
+                        使用输入参数spiData中的成员对datas中的q和qd成员赋值
+                        调用函数computeLegJacobianAndPosition
+                        
+>>>>>>>	template <typename T>
+                  void computeLegJacobianAndPosition(Quadruped<T>& quad, Vec3<T>& q, Mat3<T>* J,  Vec3<T>* p, int leg) 
+	函数功能：           
