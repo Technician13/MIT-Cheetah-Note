@@ -318,7 +318,35 @@
 
 >>>>>>> BalanceController::matrixExpOmegaCross(const Eigen::VectorXd& omega, Eigen::MatrixXd& R)
 	函数功能：罗徳里格斯公式的代码实现
-				
+
+
+###############################################################################################################################
+总结：
+主要的函数调用关系：
+updateProblemData
+		|___calc_PDcontrol
+		|___update_A_control
+		|___calc_H_qpOASES
+		|___calc_A_qpOASES
+		|___calc_g_qpOASES
+		|___update_log_variables
+SetContactData
+		|___calc_lb_ub_qpOASES
+		|___calc_lbA_ubA_qpOASES
+solveQP_nonThreaded
+		|___calc_constraint_check
+		
+此工程主要完成了基于QP的足端GRF的生成。本质上是通过使用qp_OASES求解器求解如下的二次规划问题：												
+			min  0.5 * x.transpose * H_qpOASES * x + x.transpose * g_qpOASES
+			         s.t.    lbA_qpOASES <= A_qpOASES * x <= ubA_qpOASES
+					     		    lb_qpOASES <= x<= ub_qpOASES
+其中：
+			g_qpOASES <<<< -2 * ( A_control.transpose * S_control * b_control - xOptPrev.transpose * alpha_control )
+			A_qpOASES <<<< C_control
+			H_qpOASES <<<< 2 * [ A_control.transpose * S_control * A_control + (alpha_control + 1e-3) * W_control ]
+			注："<<<<"符号此处表示矩阵或向量与数组之间的转换
+
+END
 
 
 
