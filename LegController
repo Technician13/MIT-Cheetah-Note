@@ -15,12 +15,12 @@
 >>>>>>>	template <typename T>
                   void LegControllerData<T>::zero() 
 	函数功能：将结构体LegControllerData中所有的参数置零
-                          向量类型参数：q
-                                                         qd
-                                                         p
-                                                         v
-                                                         tauEstimate
-                          矩阵类型参数：J
+                          向量类型参数：q：实际的关节位置（3*1）
+                                                         qd：实际的关节速度（3*1）
+                                                         p：实际的足端位置（3*1）
+                                                         v：实际的足端速度（3*1）
+                                                         tauEstimate：关节力矩的估计值（3*1）
+                          矩阵类型参数：J：Jacobian矩阵（3*3）
                          
 >>>>>>>	template <typename T>
                   void LegController<T>::zeroCommand()
@@ -36,8 +36,39 @@
                   void LegController<T>::updateData(const SpiData* spiData) 
 	函数功能：datas为定义的4个元素的LegControllerData结构体数组
                         使用输入参数spiData中的成员对datas中的q和qd成员赋值
-                        调用函数computeLegJacobianAndPosition
+                        调用函数computeLegJacobianAndPosition，计算四条腿各自的Jacobian矩阵以及足端位置坐标
+		        通过正运动学方法计算足端的速度
                         
 >>>>>>>	template <typename T>
+                  void LegController<T>::updateData(const TiBoardData* tiBoardData) 
+	函数功能：datas为定义的4个元素的LegControllerData结构体数组
+                        使用输入参数tiBoardData中的成员对datas中的q、qd、p和v成员赋值
+                        调用函数computeLegJacobianAndPosition，计算四条腿各自的Jacobian矩阵以及足端位置坐标
+		        使用输入参数tiBoardData中的关节力矩成员tau对datas中的tauEstimate成员赋值
+			
+>>>>>>>	template <typename T>
+                  void LegController<T>::updateCommand(SpiCommand* spiCommand)
+	函数功能：用commands中的成员更新spiCommand中的成员
+
+>>>>>>>	template <typename T>
+                  void LegController<T>::updateCommand(TiBoardCommand* tiBoardCommand)
+	函数功能：用commands中的成员更新tiBoardCommand中的成员
+	
+>>>>>>>	template<typename T>
+                  void LegController<T>::setLcm(leg_control_data_lcmt *lcmData, leg_control_command_lcmt *lcmCommand)
+	函数功能：更新lcmData和lcmCommand中的成员，本质上就是将LegControllerCommand结构体和LegControllerData结构体中的成员分类存储到lcmData结构体和lcmCommand结构体中的对应成员中
+			
+>>>>>>>	template <typename T>
                   void computeLegJacobianAndPosition(Quadruped<T>& quad, Vec3<T>& q, Mat3<T>* J,  Vec3<T>* p, int leg) 
-	函数功能：将输入参数           
+	函数功能：将输入参数quad的abadLink长度、hipLink长度、kneeLink长度以及补偿量kneeLinkY分别存储在l1、l2、l3以及l4中
+			      标志位sideSign用以区分左侧的腿和右侧的腿（左正右负），因为设计到腿部正运动学的足端在y方向上的坐标
+			      J为Jacobian矩阵，联系关节空间和足端笛卡尔空间
+			      p为足端在笛卡尔坐标系下的位置坐标，已知连杆长度和关节角度，通过正运动学求解得到足端位置坐标
+                                       |                                           l3 * sin(2 + 3) + l2 * sin(2)                                       |
+			      p =   |  (l1 + l4) * sideSign * cos(1) + [l3 * cos(2 + 3) + l2 * cos(2)] * sin(1)  |
+			               |   (l1 + l4) * sideSign * sin(1) - [l3 * cos(2 + 3) + l2 * cos(2)] * cos(1)  |
+			      有关参考方向：以左前腿为例，从右前腿的位置看去：
+			      					      对于髋关节，逆时针方向为正方向
+								      对于膝关节，逆时针方向为正方向
+							     从机体头部看去：
+							              对于肩关节，逆时针方向为正方向
