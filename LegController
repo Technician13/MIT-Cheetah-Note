@@ -40,4 +40,4 @@
                         
 >>>>>>>	template <typename T>
                   void computeLegJacobianAndPosition(Quadruped<T>& quad, Vec3<T>& q, Mat3<T>* J,  Vec3<T>* p, int leg) 
-	函数功能：           
+	函数功能：将输入参数           
