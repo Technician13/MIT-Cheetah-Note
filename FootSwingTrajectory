@@ -1,1 +1,8 @@
 类外实现的函数：
+>>>>>>>	template <typename T>
+                  void FootSwingTrajectory<T>::computeSwingTrajectoryBezier(T phase, T swingTime) 
+	函数功能：_p存储通过调用Interpolate::cubicBezier<Vec3<T>>函数生成实时的足端位置坐标，引入的参数为类FootSwingTrajectory中的私有数据成员_p0，_pf以及phase，三者分别表示
+                        摆动相的起始位置，终点位置以及此时摆动相持续时长占完整时长的比例（0到1之间）。_p0，_pf以及phase三者的赋值操作在类内实现。
+                        所使用的摆动相足端位置方程为：( yf - y0 ) * x^3 + 3 * ( yf - y0 ) * x^2 * ( 1 - x ) + y0
+
+类内实现的函数：
