@@ -72,3 +72,38 @@
 								      对于膝关节，逆时针方向为正方向
 							     从机体头部看去：
 							              对于肩关节，逆时针方向为正方向
+								    
+###############################################################################################################################
+总结：
+主要的参数成员：
+LegControllerCommand
+		|___Vec3
+		|	     |___tauFeedForward, 
+		|	     |___forceFeedForward
+		|	     |___qDes
+		|	     |___qdDes
+		|	     |___pDes
+		|	     |___vDes
+		|
+		|___Mat3
+		             |___kpCartesian
+			     |___kdCartesian
+			     |___kpJoint
+			     |___kdJoint
+LegControllerData
+		|___Vec3
+		|	     |___q
+		|	     |___qd
+		|	     |___p
+		|	     |___v
+		|	     |___tauEstimate
+		|
+		|___Mat3
+		|            |___J
+                |
+		|___Quadruped
+		             |___quadruped
+		
+此工程主要完成了机器人腿部状态量的数据处理和计算，构建Jacobian矩阵完成正运动学和逆运动学的计算，通过LCM完成数据的打包和通信
+
+END
