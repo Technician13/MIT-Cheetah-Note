@@ -1,8 +1,37 @@
 类外实现的函数：
 >>>>>>>	template <typename T>
                   void FootSwingTrajectory<T>::computeSwingTrajectoryBezier(T phase, T swingTime) 
-	函数功能：_p存储通过调用Interpolate::cubicBezier<Vec3<T>>函数生成实时的足端位置坐标，引入的参数为类FootSwingTrajectory中的私有数据成员_p0，_pf以及phase，三者分别表示
-                        摆动相的起始位置，终点位置以及此时摆动相持续时长占完整时长的比例（0到1之间）。_p0，_pf以及phase三者的赋值操作在类内实现。
-                        所使用的摆动相足端位置方程为：( yf - y0 ) * x^3 + 3 * ( yf - y0 ) * x^2 * ( 1 - x ) + y0
+	函数功能：_p存储通过调用Interpolate::cubicBezier<Vec3<T>>函数生成实时的足端位置坐标向量，引入的参数为类FootSwingTrajectory中的私有数据成员_p0，_pf以及phase，三者分别表示
+                              摆动相的起始位置，终点位置以及此时摆动相持续时长占完整时长的比例（0到1之间）。_p0，_pf以及phase三者的赋值操作在类内实现。
+                              所使用的摆动相足端位置方程为：( yf - y0 ) * x^3 + 3 * ( yf - y0 ) * x^2 * ( 1 - x ) + y0
+			      _v存储通过调用Interpolate::cubicBezierFirstDerivative<Vec3<T>>函数生成实时的足端速度向量，引入的参数为类FootSwingTrajectory中的私有数据成员_p0，_pf，phase以及函数
+			      的输入参数swingTime，其中swingTime应该表示的是采样间隔时间
+			      所使用的摆动相足端速度方程为：[ ( yf - y0 ) * 6 * x * ( 1 - x ) ] / swingTime
+			      _a存储通过调用Interpolate::cubicBezierSecondDerivative<Vec3<T>>函数生成实时的足端加速度向量，引入的参数为类FootSwingTrajectory中的私有数据成员_p0，_pf，phase以
+			      及函数的输入参数swingTime
+			      所使用的摆动相足端加速度方程为：[ ( yf - y0 ) * ( 6 - 12 * x ) ] / ( swingTime * swingTime ) 
+			      以 phase = 0.5 作为分界，即认为当 phase = 0.5 时摆动腿足端达到最高点，以此为界将足端轨迹分为上升阶段和下降阶段两部分进行规划，此处完成的是足端竖直方向的规划
+			      
+			      这里我的理解是：if判断之前完成足端水平方向上的规划，if判断之后完成足端竖直方向上的规划
 
 类内实现的函数：
+>>>>>>>	FootSwingTrajectory() 
+	函数功能：类FootSwingTrajectory的构造函数，完成对成员函数的初始化
+	
+>>>>>>>	setInitialPosition(Vec3<T> p0)
+	函数功能：根据输入参数p0完成对成员函数_p0的赋值
+	
+>>>>>>> setFinalPosition(Vec3<T> pf) 
+	函数功能：根据输入参数pf完成对成员函数_pf的赋值
+	
+>>>>>>> setHeight(T h)
+	函数功能：根据输入参数h完成对成员函数_height的赋值
+	
+>>>>>>> getPosition() 
+	函数功能：返回数据成员_p
+	
+>>>>>>> getVelocity() 
+	函数功能：返回数据成员_v
+	
+>>>>>>> getAcceleration()
+	函数功能：返回数据成员_a
