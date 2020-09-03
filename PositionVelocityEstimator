@@ -1,1 +1,10 @@
-.
+>>>>>>>	template <typename T>
+                  void LinearKFPositionVelocityEstimator<T>::setup()
+	函数功能：将_stateEstimatorData结构体成员中的parameters类成员中的double类型的数据成员controller_dt赋值给dt，后面计算会用到
+                        LinearKFPositionVelocityEstimator中的私有数据成员的初始化以及赋值：
+                        _xhat
+                        _ps
+                        _vs
+                        _A 
+                        _B
+                        _C
