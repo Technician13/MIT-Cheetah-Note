@@ -7,7 +7,8 @@
 `ref` 文件夹中存储相关的论文和电子书的pdf格式文件。     
 `BalanceController` 对应源码中BalanceController相关文件的剖析,主要是调用qpOASES求解器完成对四足机器人GRF的优化求解过程。     
 `Quadruped` 对应源码中Quadruped相关文件的剖析，主要是构建四足机器人的动力学和运动学模型。     
-`LegController` 对应源码中LegController相关文件的剖析，主要是四足机器人腿部运动学的参数处理以及正、逆运动学的计算。      
+`LegController` 对应源码中LegController相关文件的剖析，主要是四足机器人腿部运动学的参数处理以及正、逆运动学的计算。
+`FootSwingTrajectory` 对应源码中FootSwingTrajectory相关文件的剖析，主要是四足机器人腿部运动学的参数处理以及正、逆运动学的计算。 
        
 ### 其他
 原始项目地址：[https://github.com/mit-biomimetics/Cheetah-Software](https://github.com/mit-biomimetics/Cheetah-Software)       
