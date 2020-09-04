@@ -8,3 +8,15 @@
                         _A 
                         _B
                         _C
+
+>>>>>>>	template <typename T>
+                 void LinearKFPositionVelocityEstimator<T>::run()
+	函数功能：构建线性Kalman滤波框架：
+	                _xhat = _A * _xhat + _B * a：动态系统的状态空间模型，表示状态的预测
+			Pm = _A * _P *  _A.transpose + Q：协方差矩阵的预测
+			yModel = _C * _xhat：系统状态空间模型中表示输出的部分
+			_xhat += Pm * Ct * S_ey可以被更直观地描述成如下形式：
+				 _xhat = _xhat + Pm * C.transpose * S' *  ( y - yModel )
+				 其中，Kalman增益表示成Pm * C.transpose * S'
+				 这行语句表示的是状态更新
+		        _P = ( Identity - Pm * Ct * S_C ) * Pm：协方差矩阵的更新
