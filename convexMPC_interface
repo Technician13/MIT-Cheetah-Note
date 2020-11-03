@@ -1,0 +1,28 @@
+变量：
+K_NUM_LEGS = 4 : 机器人腿数目
+K_MAX_GAIT_SEGMENTS = 36 : 一个步态周期被分为36段
+
+函数：
+>>>>>>>	void initialize_mpc()
+	函数功能：以默认属性创建互斥锁problem_cfg_mt和update_mt，前者在设置问题时上锁，后者在更新问题数值时上锁
+
+>>>>>>>	void setup_problem(double dt, int horizon, double mu, double f_max)
+	函数功能：将形参赋值给problem_configuration结构体中对应的成员
+		  dt:采样时间间隔
+		  horizon:MPC控制器的预测长度
+		  mu:摩擦系数
+		  f_max:力的极限值
+		  调用resize_qp_mats函数，根据horizon的值，更新QP问题中矩阵的维度
+
+>>>>>>>	inline void mfp_to_flt(flt* dst, mfp* src, s32 n_items)
+	函数功能：内联函数，通过指针完成赋值（数组赋值）
+
+>>>>>>> inline void mint_to_u8(u8* dst, mint* src, s32 n_items)
+	函数功能：内联函数，通过指针完成赋值（数组赋值）
+
+>>>>>>> void update_problem_data(double* p, double* v, double* q, double* w, double* r, double yaw, double* weights, double* state_trajectory, double alpha, int* gait)
+	函数功能：更新问题
+		  调用函数solve_mpc完成求解
+
+>>>>>>> double get_solution(int index)
+	函数功能：获取解向量中的第index个值
