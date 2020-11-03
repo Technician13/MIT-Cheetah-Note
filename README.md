@@ -9,7 +9,8 @@
 `Quadruped` 对应源码中Quadruped相关文件的剖析，主要是构建四足机器人的动力学和运动学模型。     
 `LegController` 对应源码中LegController相关文件的剖析，主要是四足机器人腿部运动学的参数处理以及正、逆运动学的计算。       
 `FootSwingTrajectory` 对应源码中FootSwingTrajectory相关文件的剖析，主要是对摆动腿的足端位置、速度和加速度通过三次贝塞尔曲线插值进行规划。    
-`convexMPC_interface`对应源码中convexMPC_interface相关文件的剖析，主要是为MPC问题的求解和参数赋值提供接口。        
+`convexMPC_interface`对应源码中convexMPC_interface相关文件的剖析，主要是为MPC问题的求解和参数赋值提供接口。           
+`RobotState`对应源码中RobotState相关文件的剖析，主要是提供一个存储机器人状态信息和打印状态信息的对象。          
 `PositionVelocityEstimator`
 
 ### 其他
