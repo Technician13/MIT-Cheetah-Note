@@ -1,0 +1,36 @@
+参考论文：
+[1] J. Di Carlo, P. M. Wensing, B. Katz, G. Bledt and S. Kim, "Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control," 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Madrid, 2018, pp. 1-9, doi: 10.1109/IROS.2018.8594448.
+
+变量：
+Matrix<fpt,13,1> x_0 >>>>>>> 初始状态向量
+Matrix<fpt,3,3> I_world >>>>>>> 世界坐标系下的惯性矩阵
+Matrix<fpt,13,13> A_ct >>>>>>> 参考文献[1]中的公式15中的矩阵A
+Matrix<fpt,13,12> B_ct_r >>>>>>> 参考文献[1]中的公式15中的矩阵B
+
+
+
+函数：
+>>>>>>>	void solve_mpc(update_data_t* update, problem_setup* setup)
+	函数功能：求解MPC问题
+		  根据形参update和setup的成员更新rs的成员
+		  创建rpy矩阵(3*1)存储机体的横滚角、俯仰角和偏航角
+		  构建初始状态向量x_0
+		  根据参考文献[1]中的公式15计算世界坐标系下的惯性矩阵
+		  调用ct_ss_mats函数，计算A_ct和B_ct_r
+		  调用c2qp函数
+
+>>>>>>>	void ct_ss_mats(Matrix<fpt,3,3> I_world, fpt m, Matrix<fpt,3,4> r_feet, Matrix<fpt,3,3> R_yaw, Matrix<fpt,13,13>& A, Matrix<fpt,13,12>& B, float x_drag)
+	函数功能：计算参考文献[1]中的矩阵A和B
+		  调用函数cross_mat，为计算力矩做准备
+		  x_drag存疑：z方向的机体速度 = x_drag * x方向的机体速度 - 9.8 + z方向的合力/质量
+
+>>>>>>> inline Matrix<fpt,3,3> cross_mat(Matrix<fpt,3,3> I_inv, Matrix<fpt,3,1> r)
+	函数功能：将形参r从向量转换为叉乘矩阵，并与形参I_inv相乘
+		  调用时，I_inv为机体在世界坐标系下的惯性矩阵，r为足端坐标的叉乘矩阵
+
+>>>>>>> void c2qp(Matrix<fpt,13,13> Ac, Matrix<fpt,13,12> Bc,fpt dt,s16 horizon)
+	函数功能：
+
+
+>>>>>>>	mfp* get_q_soln()
+	函数功能：返回MPC问题的解向量q_soln
