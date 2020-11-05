@@ -1,13 +1,14 @@
 参考论文：
 [1] J. Di Carlo, P. M. Wensing, B. Katz, G. Bledt and S. Kim, "Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control," 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Madrid, 2018, pp. 1-9, doi: 10.1109/IROS.2018.8594448.
+[2]High-slope terrain locomotion for torque-controlled quadruped robots Focchi M., del Prete A., Havoutis I., Featherstone R., Caldwell D.G., Semini C.(2017) Autonomous Robots, 41 (1) , pp. 259-272.
 
 变量：
 Matrix<fpt,13,1> x_0 >>>>>>> 初始状态向量
 Matrix<fpt,3,3> I_world >>>>>>> 世界坐标系下的惯性矩阵
 Matrix<fpt,13,13> A_ct >>>>>>> 参考文献[1]中的公式15中的矩阵A
 Matrix<fpt,13,12> B_ct_r >>>>>>> 参考文献[1]中的公式15中的矩阵B
-
-
+Matrix<fpt,13,1> full_weight >>>>>>> 权重向量
+Matrix<fpt,Dynamic,1> X_d >>>>>>> MPC预测跨度中每个采样点的参考状态(期望值)
 
 函数：
 >>>>>>>	void solve_mpc(update_data_t* update, problem_setup* setup)
@@ -15,9 +16,39 @@ Matrix<fpt,13,12> B_ct_r >>>>>>> 参考文献[1]中的公式15中的矩阵B
 		  根据形参update和setup的成员更新rs的成员
 		  创建rpy矩阵(3*1)存储机体的横滚角、俯仰角和偏航角
 		  构建初始状态向量x_0
-		  根据参考文献[1]中的公式15计算世界坐标系下的惯性矩阵
+		  根据此笔记参考论文[1]中的公式15计算世界坐标系下的惯性矩阵
 		  调用ct_ss_mats函数，计算A_ct和B_ct_r
-		  调用c2qp函数
+		  调用c2qp函数，生成QP问题的矩阵A_qp和B_qp
+		  S功能存疑？？？
+		  使用形参update结构体中的traj数组更新参考状态向量X_d
+		  U_b为约束上限
+		  f_block为构建约束不等式中的系数矩阵的元素
+		  fmat为约束不等式中的系数矩阵，可以看作是一个对角阵，对角线上的元素是f_block。这里可以参考参考此笔记参考论文[2]中的公式(8)
+		  根据此笔记的参考论文[1]中的公式(31)(32)计算矩阵qH和qg
+		  实例化QpProblem对象jcqp
+		  根据形参update中的use_jcqp成员的值进行判断：
+		  如果use_jcqp为1：
+			    jcqp.A = fmat >>>>>>> 20h*12h
+			    jcqp.P = qH >>>>>>> 12h*12h
+			    jcqp.q = qg >>>>>>> 12h*1
+			    jcqp.u = U_b >>>>>>> 20h*1
+			    jcqp.l = 0向量 >>>>>>> 20h*1
+		  如果use_jcqp不为1：
+			    调用matrix_to_real函数，分别将：
+				qH矩阵转换为数组H_qpoases
+				qg矩阵转换为数组g_qpoases
+				fmat矩阵转换为数组A_qpoases
+				U_b矩阵转换为数组ub_qpoases
+			    数组lb_qpoases全部为0.0
+			    num_constraints为约束不等式的数目，值为20*horizon：预测跨度为horizon，每一步需要对四个足端接触力进行约束，每个力的约束有五项约束
+			    num_variables为状态量的数目，值为12*horizon：预测跨度为horizon，每一步的状态量为12个
+			    new_vars = num_variables，new_cons = num_constraints
+			    字符数组con_elim为全0数组，数组长度为num_constraints
+			    字符数组var_elim为全0数组，数组长度为num_variables
+		  	    构建循环体，循环次数为num_constraints次：
+				进行正确性检查
+		  
+		  
 
 >>>>>>>	void ct_ss_mats(Matrix<fpt,3,3> I_world, fpt m, Matrix<fpt,3,4> r_feet, Matrix<fpt,3,3> R_yaw, Matrix<fpt,13,13>& A, Matrix<fpt,13,12>& B, float x_drag)
 	函数功能：计算参考文献[1]中的矩阵A和B
@@ -29,7 +60,25 @@ Matrix<fpt,13,12> B_ct_r >>>>>>> 参考文献[1]中的公式15中的矩阵B
 		  调用时，I_inv为机体在世界坐标系下的惯性矩阵，r为足端坐标的叉乘矩阵
 
 >>>>>>> void c2qp(Matrix<fpt,13,13> Ac, Matrix<fpt,13,12> Bc,fpt dt,s16 horizon)
-	函数功能：
+	函数功能：生成QP问题的矩阵
+		  ABC为25*25的方阵，其中左上角13*13的块存储Ac，右上角13*12的块存储Bc，并与采样时间间隔dt相乘
+		  expmm相当于是求解一个齐次微分方程的解，具体的原理参考：https://blog.csdn.net/HaoZiHuang/article/details/105024959
+		  拆分expmm矩阵，左上角的13*13的块赋值给Adt，右上角的13*12的块赋值给Bdt
+		  至此，完成系数矩阵的离散化
+		  定义包含20个元素的矩阵数组powerMats，其中每个元素是接下来长度为horizon预测跨度中，每个采样点的Adt(相对于初始状态，而不是上一状态)
+		  A_qp中从上到下依次为：Adt、Adt*Adt、Adt*Adt*Adt ......，即每一采样时刻相对于初始状态的状态转移矩阵
+		  B_qp同理为下三角矩阵
+			
+>>>>>>> void matrix_to_real(qpOASES::real_t* dst, Matrix<fpt,Dynamic,Dynamic> src, s16 rows, s16 cols)
+	函数功能：将rows*cols维度的矩阵转换为数组dst，逐行扫描
+
+>>>>>>> s8 near_zero(fpt a)
+	函数功能：判断输入参数a的范围，如果a大于-0.01且小于0.01,返回1；否则返回0
+
+
+
+
+
 
 
 >>>>>>>	mfp* get_q_soln()
