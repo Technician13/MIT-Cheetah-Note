@@ -1,0 +1,45 @@
+变量：
+
+函数：
+>>>>>>> OffsetDurationGait(int nSegment, Vec4<int> offset, Vec4<int> durations, const std::string& name)
+	函数功能：类OffsetDurationGait的构造函数
+		  将形参name赋值给对象中的成员_name
+		  分配内存，建立_mpc_table数组(nSegment * 4)
+		  数组_offsetsFloat存储offsets中每个元素对与nSegment相除之后的值(映射到0-1之间)
+		  数组_durationsFloat存储durations中每个元素对与nSegment相除之后的值(映射到0-1之间)
+		  _stance存储数组durations中的第0个元素
+		  _swing存储nSegment与_stance之差
+
+>>>>>>> MixedFrequncyGait::MixedFrequncyGait(int nSegment, Vec4<int> periods, float duty_cycle, const std::string &name)
+	函数功能：类MixedFrequncyGait的构造函数
+		  将形参name赋值给对象中的成员_name
+		  将形参_duty_cycle赋值给对象中的成员_duty_cycle
+		  分配内存，建立_mpc_table数组(nSegment * 4)
+		  将形参periods赋值给对象中的成员_periods
+		  将形参nSegment赋值给对象中的成员_nIterations
+		  将对象中的成员_iteration初始化为0
+		  将对象中的成员_phase初始化为全0数组(4)
+
+>>>>>>>	OffsetDurationGait::~OffsetDurationGait()
+	函数功能：类OffsetDurationGait的析构函数
+		  释放掉构造函数中为_mpc_table申请的内存区域
+
+>>>>>>> MixedFrequncyGait::~MixedFrequncyGait()
+	函数功能：类MixedFrequncyGait的析构函数
+		  释放掉构造函数中为_mpc_table申请的内存区域
+
+>>>>>>> Vec4<float> OffsetDurationGait::getContactState()
+	函数功能：获取每条腿当前的状态占支撑相的百分比(函数名称的意思是获取接触状态，但是有文不对题的嫌疑)
+		  创建四维数组progress，progress中的每个元素存储_phase与_offsetsFloat中每个元素之差，_phase是当前进行的进度(百分比)，_offsetsFloat是每条腿的相位差位于一个周期的百分比。这里举个例子：以walk步态为例，walk步态中_offsetsFloat=[0.00 0.25 0.50 0.75]，假设此时进行的进度_phase=[0.80 0.80 0.80 0.80],即此时机体的状态相比于起始状态已经过了0.8个步态周期，则progress=[0.80 0.55 0.30 0.05]，在walk步态中_durationsFloat=[0.75 0.75 0.75 0.75]。按照源码中接下来的处理，可以得到progress=[0.00 0.55/0.75 0.30/0.75 0.05/0.75]，所表达的意义是：第一个元素所代表的腿已经进入摆动相，因此置0；后三个元素所代表的是这三条腿目前处于支撑相的百分比
+		  返回矩阵progress
+
+
+
+
+
+
+
+
+
+
+	  
