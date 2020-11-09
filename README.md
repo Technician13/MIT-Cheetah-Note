@@ -11,7 +11,8 @@
 `FootSwingTrajectory` 对应源码中FootSwingTrajectory相关文件的剖析，主要是对摆动腿的足端位置、速度和加速度通过三次贝塞尔曲线插值进行规划。    
 `convexMPC_interface`对应源码中convexMPC_interface相关文件的剖析，主要是为MPC问题的求解和参数赋值提供接口。           
 `RobotState`对应源码中RobotState相关文件的剖析，主要是提供一个存储机器人状态信息和打印状态信息的对象。          
-`SolverMPC` 对应源码中SolverMPC相关文件的剖析，主要是构建一个MPC问题并完成求解。     
+`SolverMPC` 对应源码中SolverMPC相关文件的剖析，主要是构建一个MPC问题并完成求解。        
+`Gait` 对应源码中Gait相关文件的剖析，主要是对机器人行走步态的分析，涉及到摆动相和支撑相的分析。         
 `PositionVelocityEstimator`
 
 ### 其他
