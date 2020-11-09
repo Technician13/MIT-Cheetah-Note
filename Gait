@@ -1,4 +1,12 @@
+参考论文：
+[1] J. Di Carlo, P. M. Wensing, B. Katz, G. Bledt and S. Kim, "Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control," 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Madrid, 2018, pp. 1-9, doi: 10.1109/IROS.2018.8594448.
+
 变量：
+currentIteration：当前迭代次数
+iterationsPerMPC：每段迭代次数
+_nIterations：一步中有多少段(论文中给出的是10～16)
+_iteration：当前处于一个步态周期中的第几段
+_phase：当前在一个步态周期中的百分比
 
 函数：
 >>>>>>> OffsetDurationGait(int nSegment, Vec4<int> offset, Vec4<int> durations, const std::string& name)
@@ -33,12 +41,55 @@
 		  创建四维数组progress，progress中的每个元素存储_phase与_offsetsFloat中每个元素之差，_phase是当前进行的进度(百分比)，_offsetsFloat是每条腿的相位差位于一个周期的百分比。这里举个例子：以walk步态为例，walk步态中_offsetsFloat=[0.00 0.25 0.50 0.75]，假设此时进行的进度_phase=[0.80 0.80 0.80 0.80],即此时机体的状态相比于起始状态已经过了0.8个步态周期，则progress=[0.80 0.55 0.30 0.05]，在walk步态中_durationsFloat=[0.75 0.75 0.75 0.75]。按照源码中接下来的处理，可以得到progress=[0.00 0.55/0.75 0.30/0.75 0.05/0.75]，所表达的意义是：第一个元素所代表的腿已经进入摆动相，因此置0；后三个元素所代表的是这三条腿目前处于支撑相的百分比
 		  返回矩阵progress
 
+>>>>>>> Vec4<float> MixedFrequncyGait::getContactState() 
+	函数功能：目前不是太懂，但是逻辑上与OffsetDurationGait::getContactState()差不多
 
+>>>>>>> Vec4<float> OffsetDurationGait::getSwingState()
+	函数功能：获取每条腿当前的状态占摆动相的百分比
+		  这里举个例子：以walk步态为例，walk步态中_offsetsFloat=[0.00 0.25 0.50 0.75]，_durationsFloat=[0.75 0.75 0.75 0.75]，所以swing_offset=[0.75 1.00 1.25 1.50]=[0.75 0.00 0.25 0.50]。数组swing_duration中存储在当前步态下，摆动相占一个步态周期的百分比，因此walk步态下，swing_duration=[0.25 0.25 0.25 0.25]。假设此时进行的进度_phase=[0.80 0.80 0.80 0.80],即此时机体的状态相比于起始状态已经过了0.8个步态周期，则progress=[0.05 0.80 0.55 0.30]。按照源码中接下来的处理，可以得到progress=[0.05/0.25 0.00 0.00 0.00]，所表达的意义是：第一个元素所代表的腿已经进入摆动相，目前处于摆动相的0.05/0.25位置处；后三个元素所代表的是这三条腿目前处于支撑相，因此置0
+		  返回矩阵progress
 
+>>>>>>> Vec4<float> MixedFrequncyGait::getSwingState() 
+	函数功能：目前不是太懂，但是逻辑上与OffsetDurationGait::getSwingState()差不多
 
+>>>>>>> int* OffsetDurationGait::getMpcTable()
+	函数功能：在数组_mpc_table中存储每一段中每条腿的接触状态。所谓“段”就是将一个完整的步态周期分成若干段进行MPC规划，相当于是对一个完整的连续动作的离散化过程。
+		  这里的接触状态是根据当前在总段数中的进度来判断的，如果触地，置1,否则置0
+		  返回数组_mpc_table
 
+>>>>>>> int* MixedFrequncyGait::getMpcTable() 
+	函数功能：目前不是太懂，但是逻辑上与OffsetDurationGait::getMpcTable()差不多
 
+>>>>>>> void OffsetDurationGait::setIterations(int iterationsPerMPC, int currentIteration)
+	函数功能：_iteration为当前处于一个步态周期中的第几段
+		  _phase为当前在一个步态周期中的百分比
 
+>>>>>>> void MixedFrequncyGait::setIterations(int iterationsBetweenMPC, int currentIteration) 
+	函数功能：目前不是太懂，但是逻辑上与OffsetDurationGait::setIterations(int iterationsPerMPC, int currentIteration)差不多
+
+>>>>>>> int OffsetDurationGait::getCurrentGaitPhase() 
+	函数功能：返回参数_iteration
+
+>>>>>>> int MixedFrequncyGait::getCurrentGaitPhase() {
+	函数功能：返回0
+
+>>>>>>> float OffsetDurationGait::getCurrentSwingTime(float dtMPC, int leg) 
+	函数功能：返回摆动相的时间
+
+>>>>>>> float MixedFrequncyGait::getCurrentSwingTime(float dtMPC, int leg) 
+	函数功能：目前不是太懂，但是逻辑上与OffsetDurationGait::getCurrentSwingTime(float dtMPC, int leg)差不多
+
+>>>>>>> float OffsetDurationGait::getCurrentStanceTime(float dtMPC, int leg) 
+	函数功能：返回支撑相的时间
+
+>>>>>>> float MixedFrequncyGait::getCurrentStanceTime(float dtMPC, int leg) {
+	函数功能：目前不是太懂，但是逻辑上与OffsetDurationGait::getCurrentStanceTime(float dtMPC, int leg)差不多
+
+>>>>>>> void OffsetDurationGait::debugPrint() 
+	函数功能：空函数
+
+>>>>>>> void MixedFrequncyGait::debugPrint()
+	函数功能：空函数
 
 
 
