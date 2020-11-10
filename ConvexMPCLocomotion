@@ -28,8 +28,57 @@ dtMPC = dt * iterationsBetweenMPC：每个MPC段的时间
 		  向量pBody_des(3*1)和向量vBody_des(3*1)和向量aBody_des(3*1)初始化为0向量
 
 >>>>>>>	void ConvexMPCLocomotion::initSparseMPC() 
-	函数功能：
-  
-		  
-		  
+	函数功能：创建机体惯性矩阵baseInertia
+		  baseInertia = |  0.07    0     0   |
+				|   0     0.26   0   |
+				|   0      0   0.242 |
+   		  定义机体的质量mass = 9
+		  定义力的极限值maxForce = 120
+		  创建向量dtTraj，长度为horizonLength，每个元素为dtMPC
+		  创建权重向量weights(12*1)	
+		  调用_sparseCMPC对象中的成员函数完成问题的配置
+
+>>>>>>> void ConvexMPCLocomotion::recompute_timing(int iterations_per_mpc) 
+	函数功能：根据形参iterations_per_mpc的值重新计算iterationsBetweenMPC和dtMPC
+
+>>>>>>> void ConvexMPCLocomotion::updateMPCIfNeeded(int *mpcTable, ControlFSMData<float> &data, bool omniMode) 
+	函数功能：判断iterationCounter对iterationsBetweenMPC是否等于零(从变量名来看这应该是一个计数器，检测当前是不是一个MPC段的开始状态)，如果等于0：
+			调用data对象中的_stateEstimator对象成员的getResult()函数，返回值存储到seResult中，返回值的内容包括：
+				腿部触地估计向量seResult(4*1)
+				位置向量position(3*1)
+				机体坐标系下的速度向量vBody(3*1)
+				四元数orientation
+				机体坐标系下的旋转角速度omegaBody(3*1)
+				机体旋转矩阵rBody(3*3)
+				旋转欧拉角Roll/Yaw/Pitch向量rpy(3*1)
+				世界坐标系下的旋转角速度omegaWorld(3*1)
+				世界坐标系下的速度向量vWorld(3*1)
+				机体坐标系下的加速度向量aBody(3*1)
+		  		世界坐标系下的加速度向量aWorld(3*1)
+				对lcm通信框架的配置
+			将机体的位置向量position记录在指针p
+			设置机体坐标系下的期望速度向量v_des_robot(3*1)，存储_x_vel_des、_y_vel_des以及0,表示三个方向上的期望速度
+			设置世界坐标系下的期望速度向量，这里需要进行一次是否使用全方位模式的判断
+			如果当前的步态为站立步态(current_gait == 4)
+				定义数组trajInitial(12)，存放机体期望横滚角、期望俯仰角、期望偏航角、期望X坐标、期望Y坐标、机体高度(期望Z坐标)，以及6个0(期望的速度和角速度)
+				将其按照MPC段进行扩展
+			否则：
+				定义位置的误差max_pos_error = 0.1
+				定义xStart为机体在世界坐标系下的X方向的期望位置
+				定义yStart为机体在世界坐标系下的Y方向的期望位置
+		  		重新设定期望值xStart和yStart，使得二者与实际值之间的差距不大于max_pos_error
+				world_position_desired[0] = xStart;
+      				world_position_desired[1] = yStart;
+				定义数组trajInitial(12)，存放机体期望横滚角、期望俯仰角、期望偏航角、期望X坐标、期望Y坐标、机体高度(期望Z坐标)，0,0,偏航角速度，世界坐标系下的X方向速度，世界坐标系下的Y方向速度，0
+				将其按照MPC段进行扩展，其中与位置有关的项，下一MPC段的值与当前MPC段的值之间的变化过程视为匀速运动；与速度有关的项，下一MPC段的值与当前MPC段的值之间视为不变
+				选择调用solveSparseMPC或者solveDenseMPC函数进行求解(稀疏或者稠密？？？)
+				
+
+
+
+
+
+
+
+
 		  
