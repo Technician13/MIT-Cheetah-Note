@@ -1,0 +1,35 @@
+参考论文：
+[1] J. Di Carlo, P. M. Wensing, B. Katz, G. Bledt and S. Kim, "Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control," 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Madrid, 2018, pp. 1-9, doi: 10.1109/IROS.2018.8594448.
+
+变量：
+horizonLength：一个完整的步态周期由10个MPC段组成，即horizonLength个MPC段
+iterationsBetweenMPC：每个MPC段由iterationsBetweenMPC次计算组成
+dt：每次计算的时间长度(参考论文中给出的频率貌似是1kHz，所以这里的dt应该是1ms)
+dtMPC = dt * iterationsBetweenMPC：每个MPC段的时间
+
+函数：
+>>>>>>>	ConvexMPCLocomotion::ConvexMPCLocomotion(float _dt, int _iterations_between_mpc, MIT_UserParameters* parameters)
+	函数功能：类ConvexMPCLocomotion的构造函数，使用初始化列表，实例化：
+		  trotting对象：对角步态，触地时间比例50%
+		  bounding对象：跳跃步态，左前腿和右前腿先同时离地。左后腿和右后腿再同时离地，触地时间比例40%
+		  pronking对象：四条腿先同时触地，再同时离地，触地时间比例40%
+		  jumping对象：四条腿先同时触地，再同时离地，触地时间比例20%
+		  galloping对象：奔跑步态，四条腿依次离地，再依次触地，触地时间比例40%
+		  standing对象：站立步态，四条腿一直站立，触地时间比例100%
+		  trotRunning对象：对角小跑步态，触地时间比例40%
+		  walking对象：行走步态，四条腿依次离地，再依次触地，触地时间比例50%
+		  walking2对象：对角慢走步态，触地时间比例70%
+		  pacing对象：其实就是trotting换了个摆腿顺序
+		  输出MPC计算的相关信息
+		  调用setup_problem函数规定规划问题中的矩阵的维度。完成问题的初始化，其中摩擦系数定义为0.4,力的极限值定义为120
+		  向量rpy_comp(3*1)和向量rpy_int(3*1)初始化为0向量
+		  bool类型的数组firstSwing(4)所有元素都被初始化为true
+		  调用initSparseMPC()函数
+		  向量pBody_des(3*1)和向量vBody_des(3*1)和向量aBody_des(3*1)初始化为0向量
+
+>>>>>>>	void ConvexMPCLocomotion::initSparseMPC() 
+	函数功能：
+  
+		  
+		  
+		  
