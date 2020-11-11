@@ -1,5 +1,7 @@
 参考论文：
 [1] J. Di Carlo, P. M. Wensing, B. Katz, G. Bledt and S. Kim, "Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control," 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Madrid, 2018, pp. 1-9, doi: 10.1109/IROS.2018.8594448.
+[2] G. Bledt, M. J. Powell, B. Katz, J. Di Carlo, P. M. Wensing and S. Kim, "MIT Cheetah 3: Design and Control of a Robust, Dynamic Quadruped Robot," 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Madrid, 2018, pp. 2245-2252, doi: 10.1109/IROS.2018.8593885.
+
 
 变量：
 horizonLength：一个完整的步态周期由10个MPC段组成，即horizonLength个MPC段
@@ -7,6 +9,8 @@ iterationsBetweenMPC：每个MPC段由iterationsBetweenMPC次计算组成
 dt：每次计算的时间长度(参考论文中给出的频率貌似是1kHz，所以这里的dt应该是1ms)
 dtMPC = dt * iterationsBetweenMPC：每个MPC段的时间
 x_comp_integral：z轴方向的加速度与x轴方向速度之间的关系参数，即x_drag
+iterationCounter：从开始运行到当前一共进行iterationCounter次计算
+firstSwing：标志位，如果当前腿处于支撑相，则为true；处于摆动相，则为false
 
 函数：
 >>>>>>>	ConvexMPCLocomotion::ConvexMPCLocomotion(float _dt, int _iterations_between_mpc, MIT_UserParameters* parameters)
@@ -120,7 +124,60 @@ x_comp_integral：z轴方向的加速度与x轴方向速度之间的关系参数
 		  调用data对象中的_stateEstimator对象成员的getResult()函数，返回值存储到seResult中
 		  四足机器人站立
 		  根据不同的gaitNumber数值，实例化不同的类Gait的对象
-		  
+		  调用setIterations函数分别计算当前步态和jumping步态的_iteration以及_phase，其中，_iteration为当前处于一个步态周期中的第几段，_phase为当前在一个步态周期中的百分比
+		  检查jump行为是否被触发
+		  检查jump动作
+		  向量v_des_robot(3*1)存储期望速度，分别为_x_vel_des、_y_vel_des和0
+		  向量v_des_world(3*1)存储在世界坐标系下的期望速度，这里需要进行一次是否使用全方位模式的判断
+		  向量v_robot(3*1)存储当前在世界坐标系下的速度
+		  判断当前机器人在x方向的速度的绝对值是否大于0.2,如果大于0.2：
+			更新初始的Pitch(这个更新算法不是很懂。。。。)
+		  判断当前机器人在y方向的速度的绝对值是否大于0.1,如果大于0.1：
+			更新初始的Roll(这个更新算法不是很懂。。。。)
+		  将初始的Pitch和初始的Roll进行范围限定
+		  计算Roll的补偿值和Pitch的补偿值(这里的算法不是很懂。。。。)
+		  向量pFoot(3*4)中存储四个足端在世界坐标系下的坐标
+		  如果当前的步态不是站立步态：
+			设定世界坐标系下的目标位置(x方向的期望位置，y方向的期望位置，0偏航角)，为初始目标位置加上期望速度对时间的积分
+		  判断是不是第一次运行，如果是第一次运行：
+			x方向的期望位置即为x方向的当前位置，y方向的期望位置即为y方向的当前位置，期望的偏航角即为当前的偏航角
+			设定四条腿的摆动轨迹，这里第一次运行的话，四足机器人将执行原地踏步的动作
+			初次运行标志为置为false
+		  遍历四条腿，设定四条腿的摆动时长
+		  数组side_sign存储腿部编号(-1：右侧的两条腿，1：左侧的两条腿)
+		  创建循环，遍历四条腿：
+			判断是否是第一次摆动，进行摆动倒计时
+			设定摆动腿抬腿高度0.06
+			向量offset为y方向的偏移量
+			向量pRobotFrame为髋关节在机体坐标系下的修正后的结果
+			变量stance_time存储支撑持续时长
+			向量des_vel存储期望的速度(_x_vel_des、_y_vel_des、0.0)
+			最后计算得到四条腿的落足点的坐标，这里参考论文[2]的公式6有表述
+		  计算次数计数器加1
+		  设定支撑腿的Kp和Kd增益
+		  向量contactStates调用getContactState函数存储四条腿当前处于支撑相的百分比，如果处于摆动相，则置0
+		  向量swingStates调用getSwingState函数存储四条腿当前处于摆动相的百分比，如果处于支撑相，则置0
+		  调用getMpcTable函数获取预测的接触状态列表，并使用指针mpcTable指向这个列表
+		  调用函数updateMPCIfNeeded完成GRF的计算
+		  创建向量se_contactState(4*1)存储估计的足端触地状态并初始化为全0向量
+		  创建循环，遍历四条腿：
+			变量contactState存储这条腿当前处于支撑相的百分比(如果处于摆动相，则为0)
+			变量swingState存储这条腿当前处于摆动相的百分比(如果处于支撑相，则为0)
+		  	判断当前是否处于摆动相，如果处于v摆动相：
+				判断标志位firstSwing的值，可以判断是否刚刚从支撑相进入摆动相
+				调用computeSwingTrajectoryBezier函数规划摆动轨迹
+				向量pDesFootWorld(3*1)调用getPosition函数存储当前摆动腿足端在世界坐标系下的位置信息
+				向量vDesFootWorld(3*1)调用getVelocity函数存储当前摆动腿足端在世界坐标系下的速度信息
+				向量pDesLeg(3*1)存储当前足端位置坐标在髋关节坐标系下的坐标信息
+				向量vDesLeg(3*1)存储当前足端速度在髋关节坐标系下的表示方式
+				向量pFoot_des存储摆动腿足端在世界坐标系下的位置信息
+				向量vFoot_des存储摆动腿足端在世界坐标系下的速度信息
+				向量aFoot_des存储摆动腿足端在世界坐标系下的加速度信息
+				判断是否使用WBC控制，发送数据
+			否则，即这条腿处于支撑相：
+				firstSwing置true
+				与上文同样，定义pDesFootWorld、vDesFootWorld、pDesLeg和vDesLeg(这里怀疑源码有问题，因为当前是对支撑腿进行处理，而这里却调用了摆动腿的相关函数)
+		
 		  
 		  
 
