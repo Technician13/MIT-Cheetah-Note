@@ -6,6 +6,7 @@ horizonLength：一个完整的步态周期由10个MPC段组成，即horizonLeng
 iterationsBetweenMPC：每个MPC段由iterationsBetweenMPC次计算组成
 dt：每次计算的时间长度(参考论文中给出的频率貌似是1kHz，所以这里的dt应该是1ms)
 dtMPC = dt * iterationsBetweenMPC：每个MPC段的时间
+x_comp_integral：z轴方向的加速度与x轴方向速度之间的关系参数，即x_drag
 
 函数：
 >>>>>>>	ConvexMPCLocomotion::ConvexMPCLocomotion(float _dt, int _iterations_between_mpc, MIT_UserParameters* parameters)
@@ -73,12 +74,68 @@ dtMPC = dt * iterationsBetweenMPC：每个MPC段的时间
 				将其按照MPC段进行扩展，其中与位置有关的项，下一MPC段的值与当前MPC段的值之间的变化过程视为匀速运动；与速度有关的项，下一MPC段的值与当前MPC段的值之间视为不变
 				选择调用solveSparseMPC或者solveDenseMPC函数进行求解(稀疏或者稠密？？？)
 				
+>>>>>>> void ConvexMPCLocomotion::solveDenseMPC(int *mpcTable, ControlFSMData<float> &data) 
+	函数功能：调用data对象中的_stateEstimator对象成员的getResult()函数，返回值存储到seResult中
+		  创建权重向量Q并用指针weights指向Q
+		  估计的旋转角中的Yaw存储在变量yaw中
+		  设置一个很小的数alpha
+		  指针p指向位置向量position
+		  指针v指向估计的世界坐标系下的速度向量vWorld
+		  指针w指向估计的世界坐标系下的角速度向量omegaWorld
+		  指针q指向四元数向量orientation
+		  12维数组r存储机体中心到每个足端的向量的x、y、z值，存储方式：[x0 x1 x2 x3 y0 y1 y2 y3 z0 z1 z2 z3]
+		  向量pxy_act(3*1)存储机体在xy平面上的实际位置向量(position向量的前两个元素)，第三个元素设置为0
+		  向量pxy_des(3*1)存储机体在xy平面上的期望位置向量(world_position_desired向量，也就是在updateMPCIfNeeded函数中推导的xStart和yStart)，第三个元素设置为0
+		  pz_err为z方向的偏差值
+		  向量vxy(3*1)存储机体在xy平面上的实际速度向量(vWorld向量的前两个元素)，第三个元素设置为0
+		  调用setup_problem函数完成MPC问题的设定
+		  调用update_x_drag函数完成对于z轴方向的加速度与x轴方向速度之间的关系参数的设定，x_comp_integral即为这个系数
+		  如果机体在x方向上的速度超过0.3,对系数x_comp_integral进行更新(这个更新算法不是很懂。。。。)
+		  调用update_solver_settings函数对JCQP求解器进行配置
+		  调用update_problem_data_floats函数完成MPC问题的求解
+		  创建循环：
+			创建向量f(3*1)
+			对四条腿进行遍历，每次遍历，f存储对应的腿地面反作用力(GRF，也就是刚刚求解的MPC问题的结果)，调用get_solution函数完成反作用力的获取
+			f中现在存储的是在世界坐标系下的某条腿的地面反作用力的数值，需要将它转换到机体坐标系下的足端输出力，转换后的结果存储到f_ff中(3*4)
+			将四条腿的地面反作用力(4个f)存储到Fr_des中(3*4)
 
+>>>>>>> void ConvexMPCLocomotion::solveSparseMPC(int *mpcTable, ControlFSMData<float> &data) 
+	函数功能：求解MPC问题，逻辑和solveDenseMPC差不多
 
+>>>>>>> void ConvexMPCLocomotion::_SetupCommand(ControlFSMData<float> & data)
+	函数功能：设置每项的期望值
+		  根据当前机器人是Mini Cheetah还是Cheetah 3设置不同的机体高度
+		  根据是否使用遥控器进行判断，如果使用遥控器：
+			实例化类rc_control_settings的对象rc_cmd，存储遥控数据
+		  否则使用默认方式
+		  _x_vel_des相当于是一个逐步加速的过程，逐渐从当前的_x_vel_des逼近x_vel_cmd，最后与x_vel_cmd相等
+		  _y_vel_des与_x_vel_des处理方式相同
+		  _yaw_des在一个dt时间间隔内认为是匀加速运动
+		  _roll_des和_pitch_des均设置为0
 
-
-
-
-
-
+>>>>>>> void ConvexMPCLocomotion::run(ControlFSMData<float>& data)
+	函数功能：关闭全方位模式
+		  调用_SetupCommand函数，完成对期望值以及工作方式的设置
+		  变量gaitNumber中存储当前的步态编号
+		  调用data对象中的_stateEstimator对象成员的getResult()函数，返回值存储到seResult中
+		  四足机器人站立
+		  根据不同的gaitNumber数值，实例化不同的类Gait的对象
 		  
+		  
+		  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
