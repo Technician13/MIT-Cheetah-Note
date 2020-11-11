@@ -12,7 +12,8 @@
 `convexMPC_interface`对应源码中convexMPC_interface相关文件的剖析，主要是为MPC问题的求解和参数赋值提供接口。           
 `RobotState`对应源码中RobotState相关文件的剖析，主要是提供一个存储机器人状态信息和打印状态信息的对象。          
 `SolverMPC` 对应源码中SolverMPC相关文件的剖析，主要是构建一个MPC问题并完成求解。        
-`Gait` 对应源码中Gait相关文件的剖析，主要是对机器人行走步态的分析，涉及到摆动相和支撑相的分析。         
+`Gait` 对应源码中Gait相关文件的剖析，主要是对机器人行走步态的分析，涉及到摆动相和支撑相的分析。   
+`ConvexMPCLocomotion` 对应源码中ConvexMPCLocomotion相关文件的剖析，主要是将步态的控制与MPC控制器完成结合。       
 `PositionVelocityEstimator`
 
 ### 其他
