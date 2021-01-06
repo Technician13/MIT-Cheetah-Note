@@ -1,17 +1,30 @@
+参考论文：
+[1]Camurri M, Fallon M, Bazeille S, et al. Probabilistic contact estimation and impact detection for state estimation of quadruped robots[J]. IEEE Robotics and Automation Letters, 2017, 2(2): 1023-1030.
+
+变量：
+	Rbod：机体坐标系到世界坐标系的旋转矩阵(3*3)
+	p_rel：机体坐标系下的足端位置坐标(3*1)
+	p_f：世界坐标系下的足端位置坐标(3*1)
+	_ps：以每个足端为基准，位于机体中心的世界坐标系的位置(12*1)
+	trust：速度检测的信任度
+	trust_window：速度检测的阈值
+	
+	
+函数：	
 >>>>>>>	template <typename T>
                   void LinearKFPositionVelocityEstimator<T>::setup()
 	函数功能：将_stateEstimatorData结构体成员中的parameters类成员中的double类型的数据成员controller_dt赋值给dt，后面计算会用到
                         LinearKFPositionVelocityEstimator中的私有数据成员的初始化以及赋值：
-                        _xhat
-                        _ps
-                        _vs
-                        _A 
-                        _B
-                        _C
+
 
 >>>>>>>	template <typename T>
                  void LinearKFPositionVelocityEstimator<T>::run()
 	函数功能：构建线性Kalman滤波框架：
+		  从源码中的第152行开始：
+			构建28*1的列向量y，按照顺序存储_ps，_vs和pzs，其中：
+				_ps：以每个足端为基准，位于机体中心的世界坐标系的位置(12*1)
+				_vs：每个足端对于当前机体速度的检测值，这里可以参考论文[1]中的计算方法，与此同时，与上一时刻滤波得到的最终的速度值之间进行加权，权重系数为trust，说白了也就是现在我到底信任谁的问题，是更信任上一时刻的最终滤波后的结果速度还是更信任此时通过腿部估计的速度，在二者之间进行加权，权重系数与trust相关，而trust与当前所处的一个完整步态周期的百分比有关，源码中设定速度检测的阈值trust_window为0.2,在一个完整的步态周期中，phase为估计的着地概率，phase处于0-0.2时，trust为phase/0.2;phase处于0.2-0.8时，trust为1;phase处于0.8-1的时，trust为(1-phase)/0.2。也就是说着地概率很小或者很大的时候，trust与这个概率有关，而其余时候都是1。trust越大，也就越相信此时通过腿部估计的速度。
+
 	                _xhat = _A * _xhat + _B * a：动态系统的状态空间模型，表示状态的预测
 			Pm = _A * _P *  _A.transpose + Q：协方差矩阵的预测
 			yModel = _C * _xhat：系统状态空间模型中表示输出的部分
