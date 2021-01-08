@@ -1,6 +1,6 @@
 参考论文：
 [1] J. Di Carlo, P. M. Wensing, B. Katz, G. Bledt and S. Kim, "Dynamic Locomotion in the MIT Cheetah 3 Through Convex Model-Predictive Control," 2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), Madrid, 2018, pp. 1-9, doi: 10.1109/IROS.2018.8594448.
-[2]High-slope terrain locomotion for torque-controlled quadruped robots Focchi M., del Prete A., Havoutis I., Featherstone R., Caldwell D.G., Semini C.(2017) Autonomous Robots, 41 (1) , pp. 259-272.
+[2] High-slope terrain locomotion for torque-controlled quadruped robots Focchi M., del Prete A., Havoutis I., Featherstone R., Caldwell D.G., Semini C.(2017) Autonomous Robots, 41 (1) , pp. 259-272.
 
 变量：
 Matrix<fpt,13,1> x_0 >>>>>>> 初始状态向量
