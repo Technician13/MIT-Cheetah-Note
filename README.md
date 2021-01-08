@@ -1,4 +1,4 @@
-# MIT-Cheetah-
+# MIT-Cheetah-Note
 ## MIT Cheetah仿真平台源码笔记以及一部分第三方组件
 ### 仓库说明
 >在看MIT Cheetah仿真平台的源码的过程中所做的笔记的整理，为了更好地理解源码，因此对应代码中提到的部分参考论文，手动整理了这份笔记，希望与同好交流，笔记中的错误之处欢迎指正。
@@ -14,7 +14,7 @@
 `SolverMPC` 对应源码中SolverMPC相关文件的剖析，主要是构建一个MPC问题并完成求解。        
 `Gait` 对应源码中Gait相关文件的剖析，主要是对机器人行走步态的分析，涉及到摆动相和支撑相的分析。   
 `ConvexMPCLocomotion` 对应源码中ConvexMPCLocomotion相关文件的剖析，主要是将步态的控制与MPC控制器完成结合。       
-`PositionVelocityEstimator`
+`PositionVelocityEstimator` 对应源码中PositionVelocityEstimator相关文件的剖析，主要是构建一个线性卡尔曼滤波器，完成对于机体位置和速度的估计。
 
 ### 其他
 原始项目地址：[https://github.com/mit-biomimetics/Cheetah-Software](https://github.com/mit-biomimetics/Cheetah-Software)       
