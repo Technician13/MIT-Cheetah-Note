@@ -14,7 +14,8 @@
 `SolverMPC` 对应源码中SolverMPC相关文件的剖析，主要是构建一个MPC问题并完成求解。        
 `Gait` 对应源码中Gait相关文件的剖析，主要是对机器人行走步态的分析，涉及到摆动相和支撑相的分析。   
 `ConvexMPCLocomotion` 对应源码中ConvexMPCLocomotion相关文件的剖析，主要是将步态的控制与MPC控制器完成结合。       
-`PositionVelocityEstimator` 对应源码中PositionVelocityEstimator相关文件的剖析，主要是构建一个线性卡尔曼滤波器，完成对于机体位置和速度的估计。
+`PositionVelocityEstimator` 对应源码中PositionVelocityEstimator相关文件的剖析，主要是构建一个线性卡尔曼滤波器，完成对于机体位置和速度的估计。  
+`WBC` 目录中存储对源码中所有与WBC相关的文件的剖析。
 
 ### 其他
 原始项目地址：[https://github.com/mit-biomimetics/Cheetah-Software](https://github.com/mit-biomimetics/Cheetah-Software)       
