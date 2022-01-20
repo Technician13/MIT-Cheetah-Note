@@ -1,0 +1,14 @@
+机体角度任务，声明BodyOriTask类，公有继承自Task类
+
+
+>>>>>>> BodyOriTask<T>::BodyOriTask(const FloatingBaseModel<T>* robot)
+    函数功能：构造函数，初始化参数，设定任务的维度为3
+            设定任务的雅可比矩阵Jt_维度为dim_task_ x dim_config(即3x18)
+            将Jt_对应位置的块设为单位阵
+            设定任务的JtDotQdot_为维度为dim_task_(3)的向量
+            设定任务的_Kp_kin为维度为dim_task_(3)的全1向量
+            设定任务的_Kp为维度为dim_task_(3)的全50向量
+            设定任务的_Kd为维度为dim_task_(3)的全1向量
+
+>>>>>>> BodyOriTask<T>::~BodyOriTask()
+    函数功能：析构函数，空函数
