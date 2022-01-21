@@ -1,0 +1,31 @@
+机体摆动腿足端任务，声明LinkPosTask类，公有继承自Task类
+
+数据成员：link_idx_ ------ 足端标号(FR = 9：右前腿 | FL = 11：左前腿 | HR = 13：右后腿 | HL = 15：左后腿)
+        //TODO
+        virtual_depend_ ------ 目前还不知道是啥意思？？？
+
+>>>>>>> LinkPosTask<T>::LinkPosTask(const FloatingBaseModel<T>* robot, int link_idx, bool virtual_depend)
+    函数功能：构造函数，初始化参数，设定任务的维度为3
+            设定任务的雅可比矩阵Jt_维度为dim_task_ x dim_config(即3x18)
+            设定任务的JtDotQdot_为维度为dim_task_(3)的向量
+            设定任务的_Kp_kin为维度为dim_task_(3)的全1向量(好像没用)
+            设定任务的_Kp为维度为dim_task_(3)的全100向量
+            设定任务的_Kd为维度为dim_task_(3)的全5向量
+
+>>>>>>> LinkPosTask<T>::~LinkPosTask()
+    函数功能：析构函数，空函数
+ 
+>>>>>>> LinkPosTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des, const DVec<T>& acc_des) 
+    函数功能：生成加速度指令，对应《Highly Dynamic Quadruped Locomotion via Whole-Body Impulse Control and Model Predictive Control》论文中的公式(22)
+            pos_cmd = pos_des，为机体摆动腿足端的期望位置
+            调用浮动基座模型的接口获取摆动腿足端的当前位置和当前速度
+            op_cmd_  = _Kp  * pos_err_  + _Kd  * (vel_des_ - robot_sys_->_vGC) + acc_des_
+
+>>>>>>> LinkPosTask<T>::_UpdateTaskJacobian()
+    函数功能：更新任务的雅可比矩阵Jt_
+            调用浮动基座模型的接口获取摆动腿足端的雅可比矩阵
+
+>>>>>>> LinkPosTask<T>::_UpdateTaskJDotQdot()
+    函数功能：更新任务的JDotQdot
+            调用浮动基座模型的接口获取摆动腿足端的JDotQdot
+            用于《Highly Dynamic Quadruped Locomotion via Whole-Body Impulse Control and Model Predictive Control》论文中的公式(18)

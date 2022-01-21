@@ -1,0 +1,3 @@
+机体位姿任务，声明BodyPostureTask类，公有继承自Task类
+
+内容等价于机体角度任务(BodyOriTask)和机体位置任务(BodyPosTask)的综合
