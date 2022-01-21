@@ -1,7 +1,7 @@
-机体角度任务，声明BodyOriTask类，公有继承自Task类
+机体位置任务，声明BodyPosTask类，公有继承自Task类
 
 
->>>>>>> BodyOriTask<T>::BodyOriTask(const FloatingBaseModel<T>* robot)
+>>>>>>> BodyPosTask<T>::BodyPosTask(const FloatingBaseModel<T>* robot)
     函数功能：构造函数，初始化参数，设定任务的维度为3
             设定任务的雅可比矩阵Jt_维度为dim_task_ x dim_config(即3x18)
             将Jt_对应位置的块设为单位阵
@@ -13,18 +13,20 @@
 >>>>>>> BodyOriTask<T>::~BodyOriTask()
     函数功能：析构函数，空函数
 
->>>>>>> bool BodyOriTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des, const DVec<T>& acc_des)
+>>>>>>> bool BodyPosTask<T>::_UpdateCommand(const void* pos_des, const DVec<T>& vel_des, const DVec<T>& acc_des)
     函数功能：生成加速度指令，对应《Highly Dynamic Quadruped Locomotion via Whole-Body Impulse Control and Model Predictive Control》论文中的公式(22)
-             ori_cmd = pos_des，为机体的期望角度
-             link_ori = _robot_sys->_state.bodyOrientation，为机体的当前角度
-             op_cmd_ = _Kp * ori_err_so3 + _Kd * vel_err + TK::acc_des_
+             pos_cmd =  pos_des，为机体的期望位置
+             link_pos = _robot_sys->_state.bodyPosition，为机体的当前位置
+             quat = _robot_sys->_state.bodyOrientation，为表示机体旋转的四元数
+             Rot = ori::quaternionToRotationMatrix(quat)，将四元数转换为旋转向量
+             op_cmd_ = _Kp * (pos_cmd[i] - link_pos) + _Kd[ * (vel_des_ - curr_vel) + acc_des_
 
->>>>>>> bool BodyOriTask<T>::_UpdateTaskJacobian()
+>>>>>>> bool BodyPosTask<T>::_UpdateTaskJacobian()
     函数功能：更新任务的雅可比矩阵Jt_
              这里假设Jt_分为从左至右六部分(因为Jt_的维度为3x18，所以每部分为3x3的方阵)
-             更新结束后，Jt_的六个方阵从左至右依次为：R.transpose，0，0，0，0，0
+             更新结束后，Jt_的六个方阵从左至右依次为：0，R.transpose，0，0，0，0
              //TODO
-             为什么用R.transpose作为第一部分？？？
+             为什么用R.transpose作为第二部分？？？
 
->>>>>>> bool BodyOriTask<T>::_UpdateTaskJDotQdot()
+>>>>>>> bool BodyPosTask<T>::_UpdateTaskJDotQdot()
     函数功能：空函数，直接返回TRUE
