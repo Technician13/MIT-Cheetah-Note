@@ -21,3 +21,6 @@
 
 >>>>>>> void _SetOptimizationSize()
     函数功能：私有成员函数
+
+>>>>>>> void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input)
+    函数功能：//TODO！ 

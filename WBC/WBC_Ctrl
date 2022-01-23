@@ -1,0 +1,5 @@
+>>>>>>> void WBC_Ctrl<T>::_UpdateModel(const StateEstimate<T> & state_est, 
+                                       const LegControllerData<T> * leg_data)
+    函数功能：更新WBC计算过程中使用到的模型参数
+             更新机体姿态信息、机体位置信息、机体速度、机体角速度、关节角度、关节角速度
+             更新拉格朗日动力学中的惯性项、重力项、科氏力项以及惯性项的逆

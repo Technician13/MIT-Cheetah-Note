@@ -1,0 +1,40 @@
+参考论文：[1]Highly Dynamic Quadruped Locomotion via Whole-Body Impulse Control and Model Predictive Control
+
+
+>>>>>>> bool KinWBC<T>::FindConfiguration(const DVec<T>& curr_config , const std::vector<Task<T>*>& task_list,
+                                          const std::vector<ContactSpec<T>*>& contact_list , DVec<T>& jpos_cmd,
+                                          DVec<T>& jvel_cmd)
+    函数功能：对应[1]论文中的公式(16)～(24)
+            初始化Nc为18 x 18的单位阵，作为contact Jacobian(Jc)的投影矩阵
+
+            访问足端接触列表的首元素，更新Jc
+            调用getContactJacobian获取触地腿足端的Jacobian(3 x 18)作为Jc的初始值
+            更新行数num_rows为Jc的行数作为num_rows的初始值
+            遍历足端接触列表的剩余元素
+                调用getContactJacobian获取触地腿足端的Jacobian(3 x 18)作为Jc_i
+                num_new_rows为Jc_i的行数
+                将Jc_i从尾部接入Jc
+                更新num_rows为(num_rows+num_new_rows)
+            调用_BuildProjectionMatrix函数计算Jc的投影矩阵Nc，对应[1]论文中的公式(20)中的第一个
+            
+            访问任务列表中的首任务，更新Jt(task Jacobian)
+            JtPre = Jt * Nc，对应[1]论文中的公式(19)中的第一个
+            调用_PseudoInverse求解JtPre的伪逆矩阵JtPre_pinv
+            delta_q = JtPre_pinv * (task->getPosError())，对应[1]论文中的公式(16)中的i=1的情况  
+            qdot = JtPre_pinv * (task->getDesVel())，对应[1]论文中的公式(17)中的i=1的情况
+            调用_BuildProjectionMatrix计算JtPre的投影矩阵，对应[1]论文中的公式(20)中的第二个
+            N_pre = Nc * N_nx，对应[1]论文中的公式(19)中的第二个
+            遍历任务列表的剩余任务
+                具体流程同上
+            
+            对于构型空间中的关节元素的位置指令：jpos_cmd = curr_config + delta_q，对应[1]论文中的公式(24)
+            对于构型空间中的关节元素的速度指令：jvel_cmd = qdot
+
+>>>>>>> void KinWBC<T>::_BuildProjectionMatrix(const DMat<T>& J, DMat<T>& N)
+    函数功能：求解J的投影矩阵N
+             调用_PseudoInverse求解J的伪逆矩阵J_pinv
+             N = I_mtx(18 x 18) - J_pinv * J得到J的投影矩阵N
+
+>>>>>>> void KinWBC<T>::_PseudoInverse(const DMat<T> J, DMat<T>& Jinv)
+    函数功能：求解J的伪逆矩阵Jinv
+             调用pseudoInverse求解J的伪逆矩阵Jinv         
