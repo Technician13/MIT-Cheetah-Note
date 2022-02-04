@@ -1,0 +1,25 @@
+>>>>>>> void LocomotionCtrl<T>::_ContactTaskUpdate(void* input, ControlFSMData<T> & data)
+    函数功能：更新任务以及接触相关
+             调用_ParameterSetup函数完成所有Kp、Kd参数的初始化
+             调用_CleanUp完成接触列表与任务列表的清空
+             _quat_des为机体期望姿态的四元数表示
+             调用_body_ori_task->UpdateTask函数激活机体姿态任务
+             调用_body_pos_task->UpdateTask函数激活机体位置任务
+             将激活完成后的机体姿态任务和机体位置任务按顺序装载进任务列表
+             遍历四条腿
+                如果当前腿为支撑腿
+                    调用_foot_contact[leg]->setRFDesired函数完成GRF的初始化
+                    调用_foot_contact[leg]->UpdateContactSpec函数激活接触相关的参数
+                否则，即如果当前腿为摆动腿
+                    调用_foot_task[leg]->UpdateTask函数激活摆动腿足端任务
+                    将激活完成后的摆动腿足端任务装载进任务列表
+            
+>>>>>>> void LocomotionCtrl<T>::_ParameterSetup(const MIT_UserParameters* param)
+    函数功能：访问形参param，完成所有Kp、Kd参数的初始化
+             包括机体位置任务中的Kp、Kd参数、
+                 机体姿态任务中的Kp、Kd参数、
+                 摆动腿足端任务中的Kp、Kd参数、
+                 所有关节的Kp、Kd参数
+
+>>>>>>> void LocomotionCtrl<T>::_CleanUp()
+    函数功能：清空接触列表与任务列表

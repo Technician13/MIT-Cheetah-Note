@@ -19,8 +19,26 @@
 >>>>>>> virtual void UpdateSetting(const DMat<T>& A, const DMat<T>& Ainv, const DVec<T>& cori, const DVec<T>& grav, void* extra_setting = NULL)
     函数功能：更新拉格朗日动力学参数
 
->>>>>>> void _SetOptimizationSize()
-    函数功能：私有成员函数
-
 >>>>>>> void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input)
     函数功能：//TODO！ 
+             调用_SetOptimizationSize设置优化问题的问题规模
+             调用_SetCost设置优化问题的目标函数
+
+>>>>>>> void WBIC<T>::_SetOptimizationSize()
+    函数功能：设置优化问题的规模
+             _dim_rf初始化为0
+             _dim_Uf初始化为0
+             _dim_rf表示支撑的维度，大小是(3 * 支撑腿的数目)
+
+             _dim_opt表示整体的维度(6 + _dim_rf)
+
+             矩阵G初始化为_dim_opt x _dim_opt的全零矩阵
+             向量g0初始化为长度为_dim_opt的全零向量
+             
+>>>>>>> void WBIC<T>::_SetCost()
+    函数功能：设置优化问题的目标函数
+             idx_offset初始化为0
+             矩阵G的左上角6 x 6的块为元素全为0.1的对角阵
+             矩阵G的右下角(3 * contactNum) x (3 * contactNum)的块为元素全为1.0的对角阵
+
+

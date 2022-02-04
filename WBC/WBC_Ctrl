@@ -1,5 +1,23 @@
+>>>>>>> void WBC_Ctrl<T>::run(void* input, ControlFSMData<T> & data)
+    函数功能：WBC功能模块的最顶层入口
+             被调用时的形参传递为：
+                input为LocomotionCtrlData类型，包含机体的位置期望、速度期望、加速度期望、姿态期望、
+                     足端位置期望、足端速度期望、足端加速度期望、GRF、足端触地状态
+             调用_UpdateModel函数完成模型参数的更新
+             调用_ContactTaskUpdate函数完成任务以及接触相关的更新
+             调用_ComputeWBC()完成WBC中的所有计算
+                
 >>>>>>> void WBC_Ctrl<T>::_UpdateModel(const StateEstimate<T> & state_est, 
                                        const LegControllerData<T> * leg_data)
     函数功能：更新WBC计算过程中使用到的模型参数
              更新机体姿态信息、机体位置信息、机体速度、机体角速度、关节角度、关节角速度
              更新拉格朗日动力学中的惯性项、重力项、科氏力项以及惯性项的逆
+
+>>>>>>> void WBC_Ctrl<T>::_ComputeWBC()
+    函数功能：完成WBC中的所有的计算
+            调用_kin_wbc->FindConfiguration函数 //TODO 02-04
+
+
+
+
+

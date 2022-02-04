@@ -4,7 +4,7 @@
 >>>>>>> bool KinWBC<T>::FindConfiguration(const DVec<T>& curr_config , const std::vector<Task<T>*>& task_list,
                                           const std::vector<ContactSpec<T>*>& contact_list , DVec<T>& jpos_cmd,
                                           DVec<T>& jvel_cmd)
-    函数功能：对应[1]论文中的公式(16)～(24)
+    函数功能：对应[1]论文中的公式(16)～(24)，计算得到jpos_cmd和jvel_cmd
             初始化Nc为18 x 18的单位阵，作为contact Jacobian(Jc)的投影矩阵
 
             访问足端接触列表的首元素，更新Jc
