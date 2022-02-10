@@ -1,3 +1,6 @@
+参考论文：[1]Highly Dynamic Quadruped Locomotion via Whole-Body Impulse Control and Model Predictive Control
+
+
 >>>>>>> void LocomotionCtrl<T>::_ContactTaskUpdate(void* input, ControlFSMData<T> & data)
     函数功能：更新任务以及接触相关
              调用_ParameterSetup函数完成所有Kp、Kd参数的初始化
@@ -23,3 +26,26 @@
 
 >>>>>>> void LocomotionCtrl<T>::_CleanUp()
     函数功能：清空接触列表与任务列表
+
+>>>>>>> void LocomotionCtrl<T>::_LCM_PublishData()
+    函数功能：依赖LCM通信库，完成WBC指令的传递
+             遍历四条腿
+                清空对应的的_Fr_result(3 x 1)，这里的_Fr_result对应论文[1]中公式(25)中的fr
+                如果当前腿为支撑腿，将对应的_Fr_result赋值为_Fr
+                如果当前腿为支撑腿，将对应的触地状态contact_est赋值为1
+                如果当前腿为摆动腿，将对应的触地状态contact_est赋值为0
+             遍历三个方向[X->Y->Z]
+                赋值对应的足端在对应方向上的位置和速度
+                遍历四条腿
+                    赋值Fr_des，这里的Fr_des对应论文[1]中公式(25)中的frMPC
+                    赋值Fr，这里的Fr_des对应论文[1]中公式(25)中的fr
+                    赋值足端位置指令、足端速度指令和足端加速度指令
+                    赋值关节位置指令、速度指令
+                    赋值关节位置、速度
+                赋值机体期望位置、期望速度、期望姿态   
+                赋值机体位置、速度、姿态、角速度
+                
+
+
+
+

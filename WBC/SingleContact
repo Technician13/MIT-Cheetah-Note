@@ -1,0 +1,9 @@
+>>>>>>> SingleContact<T>::SingleContact(const FloatingBaseModel<T>* robot, int pt)
+    函数功能：摩擦锥约束块的实现
+             设定摩擦系数mu为0.4
+             Uf_为6 x 3的摩擦锥约束块
+
+>>>>>>> bool SingleContact<T>::_UpdateInequalityVector()
+    函數功能：摩擦锥约束块的边界的实现
+             ieq_vec_为6 x 1的向量，表示摩擦锥约束块的边界
+             ieq_vec_的第六个元素为-_max_Fz，即-1500

@@ -5,7 +5,9 @@
                      足端位置期望、足端速度期望、足端加速度期望、GRF、足端触地状态
              调用_UpdateModel函数完成模型参数的更新
              调用_ContactTaskUpdate函数完成任务以及接触相关的更新
-             调用_ComputeWBC()完成WBC中的所有计算
+             调用_ComputeWBC完成WBC中的所有计算
+             调用_UpdateLegCMD函数完成腿部指令的更新
+             调用_LCM_PublishData函数完成指令的传递
                 
 >>>>>>> void WBC_Ctrl<T>::_UpdateModel(const StateEstimate<T> & state_est, 
                                        const LegControllerData<T> * leg_data)
@@ -15,8 +17,19 @@
 
 >>>>>>> void WBC_Ctrl<T>::_ComputeWBC()
     函数功能：完成WBC中的所有的计算
-            调用_kin_wbc->FindConfiguration函数 //TODO 02-04
+             调用_kin_wbc->FindConfiguration函数 //TODO 02-04
 
+>>>>>>> void WBC_Ctrl<T>::_UpdateLegCMD(ControlFSMData<T> & data)
+    函数功能：更新腿部指令
+             遍历四条腿
+                将对应腿部指令的结构体清空
+                遍历关节[肩关节->髋关节->膝关节]
+                    赋值前馈扭矩
+                    赋值期望角度
+                    赋值期望角速度
+                    赋值关节的Kp和Kd参数
+                遍历四条腿  
+                    对膝关节的期望角度限幅
 
 
 
