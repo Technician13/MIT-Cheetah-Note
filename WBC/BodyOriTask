@@ -23,7 +23,7 @@
     函数功能：更新任务的雅可比矩阵Jt_
              这里假设Jt_分为从左至右六部分(因为Jt_的维度为3x18，所以每部分为3x3的方阵)
              更新结束后，Jt_的六个方阵从左至右依次为：R.transpose，0，0，0，0，0
-             //TODO
+             //TODO ？
              为什么用R.transpose作为第一部分？？？
 
 >>>>>>> bool BodyOriTask<T>::_UpdateTaskJDotQdot()

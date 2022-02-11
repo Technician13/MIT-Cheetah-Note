@@ -1,3 +1,5 @@
+参考论文：[1]Highly Dynamic Quadruped Locomotion via Whole-Body Impulse Control and Model Predictive Control
+
 声明WBIC_ExtraData类
 
 声明WBIC类，公有继承自WBC类
@@ -22,11 +24,30 @@
 >>>>>>> void WBIC<T>::MakeTorque(DVec<T>& cmd, void* extra_input)
     函数功能：调用_SetOptimizationSize设置优化问题的问题规模
              调用_SetCost设置优化问题的目标函数
-             //TODO！ 
              判断rf的维度，如果大于零，即有支撑腿
                 调用_ContactBuilding完成接触Jacobian、摩擦锥等的初始化
-                调用_SetInEqualityConstraint
-             否则
+                调用_SetInEqualityConstraint完成摩擦锥约束的构建
+                对应论文[1]中的公式(23)，计算得到_Jc的伪逆JcBar
+                对应论文[1]中的公式(21)的第二个，计算得到qddot_pre
+                对应论文[1]中的公式(20)的第一个，计算得到Npre
+             否则，即没有支撑腿
+                qddot_pre初始化为维度为18的全零向量
+                Npre初始化18 x 18的单位阵
+             
+             遍历任务列表
+                获取当前任务的Task Jacobian -> Jt
+                获取当前任务的JtDotQdot，用在论文[1]中的公式(18)
+                获取当前任务的加速度指令，就是论文[1]中的公式(22)的计算结果
+                对应论文[1]中的公式(19)中的第一个，计算得到JtPre
+                对应论文[1]中的公式(23)，计算得到JtPre的伪逆JtBar
+                对应论文[1]中的公式(18)，更新qddot_pre
+                对应论文[1]中的公式(19)中的第二个，更新Npre
+
+            调用_SetEqualityConstraint完成等式约束的构建
+            调用solve_quadprog求解优化问题，求解的结果为z
+            对应论文[1]中的公式(25)的第二组约束，更新qddot_pre
+            调用_GetSolution，获取所有关节的扭矩
+            将优化求解器的计算结果存储到_data->_opt_result
 
 >>>>>>> void WBIC<T>::_SetOptimizationSize()
     函数功能：设置优化问题的规模
@@ -79,18 +100,33 @@
              更新_JcDotQdot，前3个元素设置为JcDotQdot
              更新_Uf，这个应该是总摩擦锥约束，从索引(0,0)开始的6行3列的块设置为Uf
              更新_Uf_ieq_vec，这个应该是总摩擦锥约束边界，前6个元素设置为Uf_ieq_vec
-             更新_Fr_des，这个是承接MPC控制器的计算结果
+             更新_Fr_des，承接MPC的计算结果
 
              遍历其余的足端接触列表中的元素
                 具体流程同上
 
 >>>>>>> void WBIC<T>::_SetInEqualityConstraint()
     函数功能：设定不等式约束，满足求解器要求的格式
-             //TODO 02-05
+             构建摩擦锥约束，也是整体优化问题中唯一的一组不等式约束
+             //TODO ？
+             这里_dyn_ci0 = _Uf_ieq_vec - _Uf * _Fr_des是不是有问题
+             对照论文[1]中的公式(25)中的第四组约束，这里为什么最后乘的是MPC计算得到的fr_MPC而不是fr
              
-             
+>>>>>>> void WBIC<T>::_SetEqualityConstraint(const DVec<T>& qddot) 
+    函数功能：设定等式约束，满足求解器要求的格式 
+             对应论文[1]中的公式(25)中的第一组约束 
+             这里Sv_的维度是6 x 18
+             Sv_从索引(0,0)开始的6 x 6的块为单位阵，其余元素都是0
+             Sv_的意义是一个选择矩阵，选中了机体对应的项 
+             对应原文中的"floating base  selection matrix"
 
-
-
-
+>>>>>>> void WBIC<T>::_GetSolution(const DVec<T>& qddot, DVec<T>& cmd)
+    函数功能：得到扭矩指令
+             判断rf的维度，如果大于零，即有支撑腿
+                对应论文[1]中的公式(25)的第三组约束，更新_Fr
+                对应论文[1]中的公式(26)计算得到整体扭矩向量tot_tau
+             否则，即没有支撑腿
+                对应论文[1]中的公式(26)中没有最后一项的情况，计算得到整体扭矩向量tot_tau
+             将按引用传递的第一个形参qddot赋值为对应论文[1]中的公式(25)的第二组约束更新后的qddot_pre，在MakeTorque函数中完成
+             将按引用传递的第二个形参cmd赋值为整体扭矩向量tot_tau中的后12个元素，对应所有关节的扭矩
              

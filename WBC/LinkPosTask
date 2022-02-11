@@ -1,7 +1,7 @@
 机体摆动腿足端任务，声明LinkPosTask类，公有继承自Task类
 
 数据成员：link_idx_ ------ 足端标号(FR = 9：右前腿 | FL = 11：左前腿 | HR = 13：右后腿 | HL = 15：左后腿)
-        //TODO
+        //TODO ？
         virtual_depend_ ------ 目前还不知道是啥意思？？？
 
 >>>>>>> LinkPosTask<T>::LinkPosTask(const FloatingBaseModel<T>* robot, int link_idx, bool virtual_depend)

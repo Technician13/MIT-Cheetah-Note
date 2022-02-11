@@ -17,7 +17,9 @@
 
 >>>>>>> void WBC_Ctrl<T>::_ComputeWBC()
     函数功能：完成WBC中的所有的计算
-             调用_kin_wbc->FindConfiguration函数 //TODO 02-04
+             调用_kin_wbc->FindConfiguration完成对机器人构型空间中的项的操作
+             调用_wbic->UpdateSetting更新机体动力学参数
+             调用_wbic->MakeTorque完成WBC中的所有计算过程，最终得到前馈扭矩
 
 >>>>>>> void WBC_Ctrl<T>::_UpdateLegCMD(ControlFSMData<T> & data)
     函数功能：更新腿部指令
